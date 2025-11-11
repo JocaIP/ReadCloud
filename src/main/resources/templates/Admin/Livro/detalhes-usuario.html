@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Detalhes do Usuário - Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f5f5f5; font-family: 'Segoe UI', sans-serif; }
+        .header { background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 2rem; text-align: center; border-radius: 0 0 25px 25px; }
+        .info-card { background: #fff; border-radius: 15px; padding: 2rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); margin-top: -40px; }
+        .info-section h5 { color: #8B4513; margin-bottom: 1rem; }
+        .table { background: white; border-radius: 10px; overflow: hidden; }
+    </style>
+</head>
+<body>
+<div class="header">
+    <h1><i class="fas fa-user-circle me-2"></i> Detalhes do Usuário</h1>
+    <p class="lead">Visualize informações e empréstimos do usuário</p>
+</div>
+
+<div class="container">
+    <div class="info-card">
+        <div class="row">
+            <div class="col-md-6 info-section">
+                <h5><i class="fas fa-id-card me-2"></i> Informações Pessoais</h5>
+                <p><b>Nome:</b> <span th:text="${usuario.nome}">Nome</span></p>
+                <p><b>Email:</b> <span th:text="${usuario.email}">Email</span></p>
+                <p><b>Telefone:</b> <span th:text="${usuario.telefone}">Telefone</span></p>
+                <p><b>Status:</b>
+                    <span th:text="${usuario.ativo} ? 'Ativo' : 'Inativo'"></span>
+                </p>
+                <p><b>Papel:</b> <span th:text="${usuario.admin} ? 'Administrador' : 'Usuário'"></span></p>
+            </div>
+
+            <div class="col-md-6 info-section">
+                <h5><i class="fas fa-map-marker-alt me-2"></i> Endereço</h5>
+                <p><b>Cidade:</b> <span th:text="${usuario.cidade}">Cidade</span></p>
+                <p><b>Estado:</b> <span th:text="${usuario.estado}">Estado</span></p>
+                <p><b>CEP:</b> <span th:text="${usuario.cep}">CEP</span></p>
+                <p><b>Endereço:</b> <span th:text="${usuario.endereco}">Endereço</span></p>
+            </div>
+        </div>
+
+        <hr>
+
+        <h5 class="mt-4"><i class="fas fa-book me-2"></i> Empréstimos Ativos</h5>
+        <table class="table table-striped mt-2" th:if="${!#lists.isEmpty(emprestimos)}">
+            <thead>
+            <tr>
+                <th>Livro</th>
+                <th>Data Empréstimo</th>
+                <th>Devolução Prevista</th>
+                <th>Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${emprestimos}">
+                <td th:text="${emp.livro.titulo}">Livro</td>
+                <td th:text="${#temporals.format(emp.dataEmprestimo, 'dd/MM/yyyy')}">01/01/2024</td>
+                <td th:text="${#temporals.format(emp.dataDevolucaoPrevista, 'dd/MM/yyyy')}">10/01/2024</td>
+                <td>
+                    <span th:if="${emp.atrasado}" class="badge bg-danger">Atrasado</span>
+                    <span th:if="${!emp.atrasado}" class="badge bg-success">Em Dia</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div th:if="${#lists.isEmpty(emprestimos)}" class="alert alert-info">
+            Nenhum empréstimo ativo para este usuário.
+        </div>
+
+        <div class="text-center mt-4">
+            <a th:href="@{/admin/painel}" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-1"></i> Voltar ao Painel</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${livro.titulo} + ' | ReadCloud'">Detalhes do Livro</title>
+
+    <!-- Bootstrap e FontAwesome -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #8B4513;
+            --accent: #A0522D;
+            --light: #f8f8f8;
+        }
+
+        body {
+            background: var(--light);
+            font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .book-cover {
+            width: 100%;
+            height: 420px;
+            object-fit: cover;
+            border-bottom: 1px solid #eee;
+        }
+
+        .rating i {
+            color: #f6c23e;
+            margin-right: 2px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            border: none;
+        }
+
+        .btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        .avaliacao-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        .related-book img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+
+        .related-book img:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(90deg, var(--primary), var(--accent));">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/templates/public}">
+            <i class="fas fa-cloud me-2"></i>ReadCloud
+        </a>
+        <a th:href="@{/livros}" class="btn btn-light btn-sm">
+            <i class="fas fa-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <!-- Livro principal -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="book-card">
+                <img th:if="${livro.imagemCapa != null}" th:src="@{'/uploads/' + ${livro.imagemCapa}}" class="book-cover" alt="Capa do livro">
+                <img th:if="${livro.imagemCapa == null}" src="https://cdn-icons-png.flaticon.com/512/29/29302.png" class="book-cover" alt="Sem capa">
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <h2 class="fw-bold" th:text="${livro.titulo}">Título do Livro</h2>
+            <p class="text-muted mb-1"><strong>Autor:</strong> <span th:text="${livro.autor}"></span></p>
+            <p class="text-muted mb-1"><strong>Editora:</strong> <span th:text="${livro.editora}"></span></p>
+            <p class="text-muted mb-1"><strong>Ano:</strong> <span th:text="${livro.anoPublicacao}"></span></p>
+            <p class="text-muted mb-1"><strong>Categoria:</strong> <span th:text="${livro.categoria != null ? livro.categoria.nome : 'Sem categoria'}"></span></p>
+            <p class="text-muted"><strong>Quantidade:</strong> <span th:text="${livro.quantidade}"></span></p>
+
+            <hr>
+
+            <p class="lead" th:text="${livro.descricao}">Descrição do livro...</p>
+
+            <!-- Avaliação média -->
+            <div class="d-flex align-items-center mb-3">
+                <div class="rating">
+                    <i th:each="i : ${#numbers.sequence(1,5)}"
+                       th:class="${i <= (mediaAvaliacoes != null ? mediaAvaliacoes : 0)} ? 'fas fa-star' : 'far fa-star'"></i>
+                </div>
+                <small class="text-muted ms-2" th:text="'Média: ' + ${#numbers.formatDecimal(mediaAvaliacoes, 1, 1)} + ' / 5'">Média 0/5</small>
+            </div>
+
+            <!-- Botão de alugar -->
+            <form th:action="@{|/livros/alugar/${livro.id}|}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-primary px-4"
+                        th:disabled="${livro.quantidade == 0}">
+                    <i class="fas fa-book-reader me-1"></i>
+                    <span th:text="${livro.quantidade > 0 ? 'Alugar Livro' : 'Indisponível'}"></span>
+                </button>
+            </form>
+
+            <!-- Adicionar aos desejos -->
+            <form th:action="@{|/livros/desejar/${livro.id}|}" method="post" class="d-inline ms-2">
+                <button type="submit" class="btn btn-outline-secondary px-4">
+                    <i class="fas fa-heart me-1"></i> Adicionar aos Desejos
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Seção de avaliações -->
+    <div class="mt-5">
+        <h4><i class="fas fa-comments me-2"></i>Avaliações</h4>
+        <div th:if="${#lists.isEmpty(avaliacoes)}" class="text-muted">Nenhuma avaliação ainda.</div>
+
+        <div th:each="avaliacao : ${avaliacoes}" class="avaliacao-card">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <strong th:text="${avaliacao.usuario.nome}">Usuário</strong>
+                <small class="text-muted" th:text="${#temporals.format(avaliacao.dataAvaliacao, 'dd/MM/yyyy HH:mm')}"></small>
+            </div>
+            <div class="rating mb-2">
+                <i th:each="i : ${#numbers.sequence(1,5)}"
+                   th:class="${i <= avaliacao.rating} ? 'fas fa-star' : 'far fa-star'"></i>
+            </div>
+            <p th:text="${avaliacao.comentario}" class="mb-0"></p>
+        </div>
+    </div>
+
+    <!-- Livros relacionados -->
+    <div class="mt-5">
+        <h4><i class="fas fa-book me-2"></i>Livros Relacionados</h4>
+        <div th:if="${#lists.isEmpty(livrosRelacionados)}" class="text-muted">Nenhum livro relacionado encontrado.</div>
+        <div class="row mt-3 g-3">
+            <div th:each="rel : ${livrosRelacionados}" class="col-6 col-md-3">
+                <a th:href="@{|/livros/detalhes/${rel.id}|}" class="text-decoration-none related-book">
+                    <img th:if="${rel.imagemCapa != null}" th:src="@{'/uploads/' + ${rel.imagemCapa}}" alt="Capa" class="w-100">
+                    <img th:if="${rel.imagemCapa == null}" src="https://cdn-icons-png.flaticon.com/512/29/29302.png" alt="Sem capa" class="w-100">
+                    <p class="mt-2 text-dark text-center fw-semibold text-truncate" th:text="${rel.titulo}">Título</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

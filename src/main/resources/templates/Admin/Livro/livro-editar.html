@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Livro - Painel Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/admin/painel}">
+            <i class="fas fa-tools me-2"></i> Painel Administrativo
+        </a>
+        <div>
+            <a th:href="@{/admin/livros}" class="btn btn-outline-light btn-sm me-2">
+                <i class="fas fa-book"></i> Gerenciar Livros
+            </a>
+            <a th:href="@{/logout}" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i> Sair
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container bg-white shadow rounded p-4">
+    <h2 class="mb-4 text-center text-primary fw-bold">
+        <i class="fas fa-edit me-2"></i>Editar Livro
+    </h2>
+
+    <!-- Mensagens de feedback -->
+    <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+    <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+    <form th:action="@{/admin/livros/editar/{id}(id=${livro.id})}" th:object="${livro}" method="post" enctype="multipart/form-data" class="row g-3">
+
+        <!-- Título -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Título</label>
+            <input type="text" th:field="*{titulo}" class="form-control" placeholder="Digite o título do livro" required>
+        </div>
+
+        <!-- Autor -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Autor</label>
+            <input type="text" th:field="*{autor}" class="form-control" placeholder="Nome do autor" required>
+        </div>
+
+        <!-- Editora -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Editora</label>
+            <input type="text" th:field="*{editora}" class="form-control" placeholder="Nome da editora">
+        </div>
+
+        <!-- Ano de publicação -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Ano de Publicação</label>
+            <input type="number" th:field="*{anoPublicacao}" class="form-control" placeholder="2024">
+        </div>
+
+        <!-- ISBN -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">ISBN</label>
+            <input type="text" th:field="*{isbn}" class="form-control" placeholder="Código ISBN">
+        </div>
+
+        <!-- Categoria -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Categoria</label>
+            <select class="form-select" th:field="*{categoria.id}">
+                <option value="" disabled>Selecione uma categoria</option>
+                <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}"></option>
+            </select>
+        </div>
+
+        <!-- Quantidade -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Quantidade</label>
+            <input type="number" th:field="*{quantidade}" class="form-control" min="0">
+        </div>
+
+        <!-- Média de avaliações (somente leitura) -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Média Avaliações</label>
+            <input type="number" th:field="*{mediaAvaliacoes}" class="form-control" readonly>
+        </div>
+
+        <!-- Total de avaliações (somente leitura) -->
+        <div class="col-md-3">
+            <label class="form-label fw-semibold">Total de Avaliações</label>
+            <input type="number" th:field="*{totalAvaliacoes}" class="form-control" readonly>
+        </div>
+
+        <!-- Descrição -->
+        <div class="col-md-12">
+            <label class="form-label fw-semibold">Descrição</label>
+            <textarea th:field="*{descricao}" class="form-control" rows="5" placeholder="Descrição detalhada do livro"></textarea>
+        </div>
+
+        <!-- Imagem da capa -->
+        <div class="col-md-6">
+            <label class="form-label fw-semibold">Imagem da Capa</label>
+            <input type="file" name="imagemCapa" class="form-control">
+            <div class="mt-2" th:if="${livro.imagemCapa}">
+                <img th:src="@{${livro.imagemCapa}}" alt="Capa do Livro" class="img-thumbnail" style="max-width: 150px;">
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="col-12 text-center mt-4">
+            <button type="submit" class="btn btn-success px-4">
+                <i class="fas fa-save me-2"></i>Salvar Alterações
+            </button>
+            <a th:href="@{/admin/livros}" class="btn btn-secondary ms-2">
+                <i class="fas fa-arrow-left me-2"></i>Voltar
+            </a>
+        </div>
+    </form>
+</div>
+
+<footer class="text-center mt-5 py-3 bg-dark text-white">
+    <p class="mb-0">&copy; 2025 ReadCloud - Administração de Livros</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
