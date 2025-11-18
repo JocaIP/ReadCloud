@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluguel Confirmado - ReadCloud</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B4513;
+            --accent: #A0522D;
+            --secondary: #2F4F4F;
+            --success: #28a745;
+            --light: #F8F6F2;
+        }
+        body { background-color: var(--light); font-family: 'Segoe UI', sans-serif; }
+        .confirmation-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .confirmation-header {
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .book-cover {
+            width: 120px;
+            height: 160px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin: 0 auto 1rem;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary);
+        }
+        .deadline-box {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .btn-continue {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        .btn-continue:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="fas fa-cloud me-2" style="color: var(--primary);"></i>ReadCloud
+        </a>
+        <div class="navbar-nav">
+            <a class="nav-link" th:href="@{/livros}">
+                <i class="fas fa-arrow-left me-1"></i> Voltar para Livros
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="confirmation-card">
+                <!-- Cabeçalho de Confirmação -->
+                <div class="confirmation-header">
+                    <div class="book-cover">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <h2><i class="fas fa-check-circle me-2"></i>Aluguel Confirmado!</h2>
+                    <p class="mb-0">Seu livro foi reservado com sucesso</p>
+                </div>
+
+                <div class="p-4">
+                    <!-- Informações do Livro -->
+                    <div class="info-box">
+                        <h4 class="mb-3"><i class="fas fa-book me-2 text-primary"></i>Livro Alugado</h4>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5 th:text="${livro.titulo}">Título do Livro</h5>
+                                <p class="text-muted mb-2" th:text="${livro.autor}">Autor do Livro</p>
+                                <p class="mb-1"><strong>ISBN:</strong> <span th:text="${livro.isbn}">978-85-12345-67-8</span></p>
+                                <p class="mb-0"><strong>Categoria:</strong> <span th:text="${livro.categoria.nome}">Ficção</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detalhes do Empréstimo -->
+                    <div class="info-box">
+                        <h4 class="mb-3"><i class="fas fa-calendar-alt me-2 text-primary"></i>Detalhes do Empréstimo</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-play-circle me-2"></i>Data do Empréstimo:</strong><br>
+                                    <span th:text="${#temporals.format(emprestimo.dataEmprestimo, 'dd/MM/yyyy')}">14/11/2025</span></p>
+
+                                <p><strong><i class="fas fa-clock me-2"></i>Prazo de Devolução:</strong><br>
+                                    <span th:text="${prazoDias} + ' dias'">7 dias</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong><i class="fas fa-flag-checkered me-2"></i>Data Limite:</strong><br>
+                                    <span th:text="${#temporals.format(dataDevolucao, 'dd/MM/yyyy')}">21/11/2025</span></p>
+
+                                <p><strong><i class="fas fa-exclamation-triangle me-2"></i>Multa por Atraso:</strong><br>
+                                    <span th:text="'R$ ' + ${#numbers.formatDecimal(multaDiaria, 0, 2)} + ' por dia'">R$ 2,00 por dia</span></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Aviso Importante -->
+                    <div class="deadline-box">
+                        <h4 class="text-warning mb-3"><i class="fas fa-exclamation-circle me-2"></i>Atenção!</h4>
+                        <p class="mb-2">Você deve devolver o livro até <strong th:text="${#temporals.format(dataDevolucao, 'dd/MM/yyyy')}">21/11/2025</strong></p>
+                        <p class="mb-0 small text-muted">Após esta data, será cobrada multa de <strong th:text="'R$ ' + ${#numbers.formatDecimal(multaDiaria, 0, 2)} + ' por dia de atraso'">R$ 2,00 por dia</strong></p>
+                    </div>
+
+                    <!-- Ações -->
+                    <div class="text-center mt-4">
+                        <div class="d-flex gap-3 justify-content-center">
+                            <a th:href="@{/perfil}" class="btn btn-continue">
+                                <i class="fas fa-user me-1"></i> Ver Meus Empréstimos
+                            </a>
+                            <a th:href="@{/livros}" class="btn btn-outline-primary">
+                                <i class="fas fa-book me-1"></i> Alugar Outro Livro
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
