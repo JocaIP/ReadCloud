@@ -1,9 +1,9 @@
 package com.faculdade.biblioteca.service;
 
+import com.faculdade.biblioteca.modelo.CustomUserDetails;
 import com.faculdade.biblioteca.modelo.Usuario;
 import com.faculdade.biblioteca.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,15 +17,12 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + username));
 
-        // 🔹 CORREÇÃO: Se sua classe perfil não implementa UserDetails, use esta abordagem
-        return User.builder()
-                .username(usuario.getEmail())
-                .password(usuario.getSenha())
-                .roles(usuario.getPapel().replace("ROLE_", "")) // Converte "ROLE_ADMIN" para "ADMIN"
-                .disabled(!usuario.getAtivo())
-                .build();
+        Usuario usuario = usuarioRepository.findByEmail(username)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Usuário não encontrado: " + username)
+                );
+
+        return new CustomUserDetails(usuario); // ✅ AGORA SIM
     }
 }

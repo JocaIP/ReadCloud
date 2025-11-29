@@ -1,16 +1,16 @@
 package com.faculdade.biblioteca.controller;
 
 import com.faculdade.biblioteca.modelo.Usuario;
-import com.faculdade.biblioteca.service.EmprestimoService;
-import com.faculdade.biblioteca.service.UsuarioService;
-import com.faculdade.biblioteca.service.LivroService;
-import com.faculdade.biblioteca.service.AvaliacaoService;
+import com.faculdade.biblioteca.modelo.Notificacao;
+import com.faculdade.biblioteca.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/perfil")
@@ -20,6 +20,9 @@ public class PerfilController {
     private final UsuarioService usuarioService;
     private final LivroService livroService;
     private final AvaliacaoService avaliacaoService;
+
+    @Autowired
+    private NotificacaoService notificacaoService;
 
     @Autowired
     public PerfilController(EmprestimoService emprestimoService,
@@ -32,113 +35,154 @@ public class PerfilController {
         this.avaliacaoService = avaliacaoService;
     }
 
-    // ==============================
-    // DASHBOARD DO PERFIL (principal)
-    // ==============================
-    @GetMapping("/meu")
-    public String meuPerfil(Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuarioLogado = usuarioService.buscarPorEmail(email)
+
+    // =====================================================================
+    // DASHBOARD FINAL — COM NOTIFICAÇÕES
+    // =====================================================================
+    @GetMapping
+    public String dashboard(Model model, Authentication authentication) {
+
+        Usuario usuario = usuarioService
+                .buscarPorEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        Long usuarioId = usuarioLogado.getId();
+        Long id = usuario.getId();
 
-        model.addAttribute("usuario", usuarioLogado);
-        model.addAttribute("emprestimos", emprestimoService.buscarEmprestimosAtivos(usuarioId));
-        model.addAttribute("desejos", usuarioService.buscarDesejos(usuarioLogado));
-        model.addAttribute("historico", emprestimoService.buscarHistorico(usuarioId));
-        model.addAttribute("atrasos", emprestimoService.buscarAtrasosPorUsuario(usuarioId));
-        model.addAttribute("avaliacoes", avaliacaoService.buscarAvaliacoesPorUsuario(usuarioId));
+        // Dados do perfil
+        model.addAttribute("usuario", usuario);
+        model.addAttribute("emprestimosAtivos", emprestimoService.listarAtivosPorUsuario(id));
+        model.addAttribute("desejos", usuarioService.listarDesejosDoUsuario(id));
+        model.addAttribute("historico", emprestimoService.listarHistoricoPorUsuario(id));
+        model.addAttribute("atrasos", emprestimoService.listarAtrasosPorUsuario(id));
+        model.addAttribute("avaliacoes", avaliacaoService.buscarAvaliacoesPorUsuario(id));
 
-        model.addAttribute("totalEmprestimosAtivos", emprestimoService.buscarEmprestimosAtivos(usuarioId).size());
-        model.addAttribute("totalDesejos", usuarioService.buscarDesejos(usuarioLogado).size());
-        model.addAttribute("totalAtrasos", emprestimoService.buscarAtrasosPorUsuario(usuarioId).size());
-        model.addAttribute("totalAvaliacoes", avaliacaoService.buscarAvaliacoesPorUsuario(usuarioId).size());
+        // Totais
+        model.addAttribute("totalEmprestimosAtivos", emprestimoService.listarAtivosPorUsuario(id).size());
+        model.addAttribute("totalDesejos", usuarioService.listarDesejosDoUsuario(id).size());
+        model.addAttribute("totalAtrasos", emprestimoService.listarAtrasosPorUsuario(id).size());
+        model.addAttribute("totalAvaliacoes", avaliacaoService.buscarAvaliacoesPorUsuario(id).size());
+
+        // 🔔 Notificações
+        List<Notificacao> notificacoes = notificacaoService.buscarNaoLidas(id);
+        model.addAttribute("notificacoes", notificacoes);
+
+        // marcar como lidas APÓS exibir
+        if (!notificacoes.isEmpty()) {
+            notificacaoService.marcarTodasComoLidas(id);
+        }
 
         return "Perfil/dashboard";
     }
 
-    // ==============================
+
+    // =====================================================================
     // LISTA DE DESEJOS
-    // ==============================
+    // =====================================================================
     @GetMapping("/desejos")
     public String verDesejos(Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarPorEmail(email)
+
+        Usuario usuario = usuarioService
+                .buscarPorEmail(authentication.getName())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        model.addAttribute("desejos", usuarioService.buscarDesejos(usuario));
+        model.addAttribute("desejos", usuarioService.listarDesejosDoUsuario(usuario.getId()));
+
         return "Perfil/lista-desejos";
     }
 
-    @PostMapping("/desejos/adicionar/{id}")
-    public String adicionarDesejo(@PathVariable Long id, Authentication authentication, RedirectAttributes ra) {
+    @PostMapping("/desejos/adicionar/{livroId}")
+    public String adicionarDesejo(@PathVariable Long livroId,
+                                  Authentication authentication,
+                                  RedirectAttributes ra) {
+
         try {
-            String email = authentication.getName();
-            Usuario usuario = usuarioService.buscarPorEmail(email)
+            Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-            usuarioService.adicionarDesejo(usuario, id);
+
+            usuarioService.adicionarDesejo(usuario, livroId);
             ra.addFlashAttribute("sucesso", "Livro adicionado à lista de desejos!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao adicionar desejo: " + e.getMessage());
-        }
-        return "redirect:/perfil/desejos";
-    }
 
-    @PostMapping("/desejos/remover/{id}")
-    public String removerDesejo(@PathVariable Long id, Authentication authentication, RedirectAttributes ra) {
-        try {
-            String email = authentication.getName();
-            Usuario usuario = usuarioService.buscarPorEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-            usuarioService.removerDesejo(usuario, id);
-            ra.addFlashAttribute("sucesso", "Livro removido da lista de desejos!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao remover desejo: " + e.getMessage());
-        }
-        return "redirect:/perfil/desejos";
-    }
-
-    // ==============================
-    // HISTÓRICO DE EMPRÉSTIMOS
-    // ==============================
-    @GetMapping("/historico")
-    public String historico(Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        model.addAttribute("historico", emprestimoService.buscarHistorico(usuario.getId()));
-        return "Perfil/historico-emprestimos";
-    }
-
-    // ==============================
-    // AVALIAÇÕES
-    // ==============================
-    @GetMapping("/avaliacoes")
-    public String minhasAvaliacoes(Model model, Authentication authentication) {
-        String email = authentication.getName();
-        Usuario usuario = usuarioService.buscarPorEmail(email)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        model.addAttribute("avaliacoes", avaliacaoService.buscarAvaliacoesPorUsuario(usuario.getId()));
-        return "Perfil/minhas-avaliacoes";
-    }
-
-    // ==============================
-    // DEVOLVER LIVRO
-    // ==============================
-    @PostMapping("/devolver/{id}")
-    public String devolver(@PathVariable Long id, Authentication authentication, RedirectAttributes ra) {
-        try {
-            String email = authentication.getName();
-            Usuario usuario = usuarioService.buscarPorEmail(email)
-                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-            emprestimoService.devolverLivro(id, usuario);
-            ra.addFlashAttribute("sucesso", "Livro devolvido com sucesso!");
         } catch (Exception e) {
             ra.addFlashAttribute("erro", e.getMessage());
         }
-        return "redirect:/perfil/meu";
+
+        return "redirect:/perfil/desejos";
     }
+
+
+    @PostMapping("/desejos/remover/{livroId}")
+    public String removerDesejo(@PathVariable Long livroId,
+                                Authentication authentication,
+                                RedirectAttributes ra) {
+
+        try {
+            Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+            usuarioService.removerDesejo(usuario, livroId);
+            ra.addFlashAttribute("sucesso", "Livro removido!");
+
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
+
+        return "redirect:/perfil/desejos";
+    }
+
+
+    // =====================================================================
+    // HISTÓRICO
+    // =====================================================================
+    @GetMapping("/historico")
+    public String historico(Model model, Authentication authentication) {
+
+        Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        model.addAttribute("historico",
+                emprestimoService.listarHistoricoPorUsuario(usuario.getId()));
+
+        return "Perfil/historico-emprestimos";
+    }
+
+
+    // =====================================================================
+    // AVALIAÇÕES
+    // =====================================================================
+    @GetMapping("/avaliacoes")
+    public String minhasAvaliacoes(Model model, Authentication authentication) {
+
+        Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        model.addAttribute("avaliacoes",
+                avaliacaoService.buscarAvaliacoesPorUsuario(usuario.getId()));
+
+        return "Perfil/minhas-avaliacoes";
+    }
+
+
+    // =====================================================================
+    // DEVOLVER LIVRO
+    // =====================================================================
+    @PostMapping("/devolver/{emprestimoId}")
+    public String devolverLivro(@PathVariable Long emprestimoId,
+                                Authentication authentication,
+                                RedirectAttributes ra) {
+
+        try {
+
+            Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
+                    .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+            String msg = emprestimoService.devolverLivro(emprestimoId, usuario);
+            ra.addFlashAttribute("sucesso", msg);
+
+        } catch (Exception e) {
+            ra.addFlashAttribute("erro", e.getMessage());
+        }
+
+        return "redirect:/perfil";
+    }
+
 }

@@ -6,124 +6,116 @@
     <title>Editar Livro - Painel Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root { --primary: #8B4513; --primary-dark: #654321; --accent: #A0522D; --secondary: #2F4F4F; --cloud: #F8F8F8; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--cloud); }
+        .navbar { background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%) !important; box-shadow: 0 2px 15px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight: 700; font-size: 1.5rem; color: white !important; }
+        .form-container { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .page-title { background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; }
+        .img-thumbnail { border-radius: 8px; border: 2px solid #e9ecef; }
+    </style>
 </head>
 
 <body class="bg-light">
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+
+<nav class="navbar navbar-expand-lg navbar-dark mb-4">
     <div class="container">
-        <a class="navbar-brand fw-bold" th:href="@{/admin/painel}">
-            <i class="fas fa-tools me-2"></i> Painel Administrativo
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="fas fa-cloud me-2"></i>ReadCloud
         </a>
-        <div>
-            <a th:href="@{/admin/livros}" class="btn btn-outline-light btn-sm me-2">
-                <i class="fas fa-book"></i> Gerenciar Livros
-            </a>
-            <a th:href="@{/logout}" class="btn btn-danger btn-sm">
-                <i class="fas fa-sign-out-alt"></i> Sair
-            </a>
-        </div>
     </div>
 </nav>
 
-<div class="container bg-white shadow rounded p-4">
-    <h2 class="mb-4 text-center text-primary fw-bold">
-        <i class="fas fa-edit me-2"></i>Editar Livro
-    </h2>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
 
-    <!-- Mensagens de feedback -->
-    <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
-    <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+            <div class="form-container p-4">
+                <h2 class="page-title display-6 fw-bold mb-4">
+                    <i class="fas fa-edit me-2"></i>Editar Livro
+                </h2>
 
-    <form th:action="@{/admin/livros/editar/{id}(id=${livro.id})}" th:object="${livro}" method="post" enctype="multipart/form-data" class="row g-3">
+                <form th:action="@{/admin/livros/editar/{id}(id=${livro.id})}"
+                      th:object="${livro}"
+                      method="post"
+                      enctype="multipart/form-data"
+                      class="row g-4">
 
-        <!-- Título -->
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Título</label>
-            <input type="text" th:field="*{titulo}" class="form-control" placeholder="Digite o título do livro" required>
-        </div>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-        <!-- Autor -->
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Autor</label>
-            <input type="text" th:field="*{autor}" class="form-control" placeholder="Nome do autor" required>
-        </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Título</label>
+                        <input type="text" th:field="*{titulo}" class="form-control" required>
+                    </div>
 
-        <!-- Editora -->
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Editora</label>
-            <input type="text" th:field="*{editora}" class="form-control" placeholder="Nome da editora">
-        </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Autor</label>
+                        <input type="text" th:field="*{autor}" class="form-control" required>
+                    </div>
 
-        <!-- Ano de publicação -->
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Ano de Publicação</label>
-            <input type="number" th:field="*{anoPublicacao}" class="form-control" placeholder="2024">
-        </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Categoria</label>
+                        <select class="form-select" name="categoriaId" required>
+                            <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}"
+                                    th:selected="${livro.categoria != null and livro.categoria.id == cat.id}"></option>
+                        </select>
+                    </div>
 
-        <!-- ISBN -->
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">ISBN</label>
-            <input type="text" th:field="*{isbn}" class="form-control" placeholder="Código ISBN">
-        </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Quantidade</label>
+                        <input type="number" th:field="*{quantidade}" class="form-control" min="0" required>
+                    </div>
 
-        <!-- Categoria -->
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Categoria</label>
-            <select class="form-select" th:field="*{categoria.id}">
-                <option value="" disabled>Selecione uma categoria</option>
-                <option th:each="cat : ${categorias}" th:value="${cat.id}" th:text="${cat.nome}"></option>
-            </select>
-        </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Ano</label>
+                        <input type="number" th:field="*{anoPublicacao}" class="form-control">
+                    </div>
 
-        <!-- Quantidade -->
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Quantidade</label>
-            <input type="number" th:field="*{quantidade}" class="form-control" min="0">
-        </div>
+                    <div class="col-12">
+                        <label class="form-label">Descrição</label>
+                        <textarea th:field="*{descricao}" class="form-control" rows="5"></textarea>
+                    </div>
 
-        <!-- Média de avaliações (somente leitura) -->
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Média Avaliações</label>
-            <input type="number" th:field="*{mediaAvaliacoes}" class="form-control" readonly>
-        </div>
+                    <!-- UPLOAD PADRONIZADO -->
+                    <div class="col-md-6">
+                        <label class="form-label">Imagem da Capa</label>
+                        <input type="file" name="imagemCapa" class="form-control" accept="image/*" onchange="previewImage(event)">
 
-        <!-- Total de avaliações (somente leitura) -->
-        <div class="col-md-3">
-            <label class="form-label fw-semibold">Total de Avaliações</label>
-            <input type="number" th:field="*{totalAvaliacoes}" class="form-control" readonly>
-        </div>
+                        <div class="mt-3" th:if="${livro.imagemCapa != null and livro.imagemCapa != ''}">
+                            <label>Imagem Atual:</label>
+                            <img th:src="@{'/uploads/' + ${livro.imagemCapa}}" class="img-thumbnail" style="max-width: 150px;">
+                        </div>
+                        <img id="preview" class="img-thumbnail mt-3" style="max-width:150px; display:none;" alt="Pré-visualização">
+                    </div>
 
-        <!-- Descrição -->
-        <div class="col-md-12">
-            <label class="form-label fw-semibold">Descrição</label>
-            <textarea th:field="*{descricao}" class="form-control" rows="5" placeholder="Descrição detalhada do livro"></textarea>
-        </div>
+                    <div class="col-12 mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>Salvar Alterações
+                        </button>
+                        <a th:href="@{/admin/livros}" class="btn btn-outline-primary ms-2">Voltar</a>
+                    </div>
 
-        <!-- Imagem da capa -->
-        <div class="col-md-6">
-            <label class="form-label fw-semibold">Imagem da Capa</label>
-            <input type="file" name="imagemCapa" class="form-control">
-            <div class="mt-2" th:if="${livro.imagemCapa}">
-                <img th:src="@{${livro.imagemCapa}}" alt="Capa do Livro" class="img-thumbnail" style="max-width: 150px;">
+                </form>
             </div>
         </div>
-
-        <!-- Botões -->
-        <div class="col-12 text-center mt-4">
-            <button type="submit" class="btn btn-success px-4">
-                <i class="fas fa-save me-2"></i>Salvar Alterações
-            </button>
-            <a th:href="@{/admin/livros}" class="btn btn-secondary ms-2">
-                <i class="fas fa-arrow-left me-2"></i>Voltar
-            </a>
-        </div>
-    </form>
+    </div>
 </div>
 
-<footer class="text-center mt-5 py-3 bg-dark text-white">
-    <p class="mb-0">&copy; 2025 ReadCloud - Administração de Livros</p>
-</footer>
+<script>
+    function previewImage(e){
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = x => {
+            const img = document.getElementById("preview");
+            img.src = x.target.result;
+            img.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    }
+</script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

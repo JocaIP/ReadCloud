@@ -3,40 +3,345 @@
 <head>
     <meta charset="UTF-8">
     <title>Histórico de Empréstimos - ReadCloud</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
-        body { background-color: #f8f9fa; font-family: 'Segoe UI', sans-serif; }
-        .header { background: linear-gradient(135deg, #8B4513, #A0522D); color: white; padding: 2.5rem 1rem; text-align: center; border-radius: 0 0 25px 25px; }
-        .card-historico { background: #fff; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); border-left: 5px solid #A0522D; transition: 0.3s; }
-        .card-historico:hover { transform: translateY(-5px); }
+        :root {
+            --primary: #8B4513;
+            --accent: #A0522D;
+            --light: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--light);
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 2.5rem 1rem;
+            text-align: center;
+            border-radius: 0 0 25px 25px;
+            margin-bottom: 2rem;
+        }
+
+        .card-emprestimo {
+            background: #fff;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: 0.3s;
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-emprestimo:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .livro-capa {
+            width: 80px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .livro-sem-capa {
+            width: 80px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            color: white;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 2rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -23px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--primary);
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px var(--primary);
+        }
     </style>
 </head>
+
 <body>
+
+<!-- Header -->
 <div class="header">
-    <h1><i class="fas fa-clock me-2"></i> Histórico de Empréstimos</h1>
-    <p class="lead">Acompanhe os livros que você já leu</p>
+    <div class="container">
+        <h1><i class="fas fa-history me-2"></i> Histórico de Empréstimos</h1>
+        <p class="lead">Acompanhe todos os livros que você já alugou</p>
+    </div>
 </div>
 
 <div class="container mt-4">
-    <div th:if="${#lists.isEmpty(historico)}" class="alert alert-info text-center">
-        Você ainda não possui histórico de empréstimos.
+
+    <!-- Alerts -->
+    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${sucesso}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div class="row g-3" th:each="emp : ${historico}">
-        <div class="col-md-6">
-            <div class="card card-historico p-3">
-                <h5 class="fw-bold" th:text="${emp.livro.titulo}">Título do Livro</h5>
-                <p class="mb-1"><i class="fas fa-calendar-alt me-1"></i> Empréstimo: <span th:text="${#temporals.format(emp.dataEmprestimo, 'dd/MM/yyyy')}"></span></p>
-                <p class="mb-1"><i class="fas fa-calendar-times me-1"></i> Devolvido em: <span th:text="${#temporals.format(emp.dataDevolucao, 'dd/MM/yyyy')}"></span></p>
-                <p class="mb-1"><i class="fas fa-check text-success me-1"></i> <b>Status:</b> Devolvido</p>
+    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${erro}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Estatísticas -->
+    <div class="row" th:if="${!#lists.isEmpty(emprestimos)}">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-book fa-2x mb-3"></i>
+                <h3 th:text="${totalEmprestimos}">0</h3>
+                <p>Total de Empréstimos</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-clock fa-2x mb-3"></i>
+                <h3 th:text="${emprestimosAtivos}">0</h3>
+                <p>Empréstimos Ativos</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-check-circle fa-2x mb-3"></i>
+                <h3 th:text="${emprestimosFinalizados}">0</h3>
+                <p>Finalizados</p>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="stats-card">
+                <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                <h3 th:text="${emprestimosAtrasados}">0</h3>
+                <p>Atrasados</p>
             </div>
         </div>
     </div>
 
-    <div class="text-center mt-4">
-        <a th:href="@{/perfil/meu}" class="btn btn-outline-primary"><i class="fas fa-arrow-left me-1"></i> Voltar ao Perfil</a>
+    <!-- Filtros -->
+    <div class="filter-section" th:if="${!#lists.isEmpty(emprestimos)}">
+        <div class="row align-items-center">
+
+            <div class="col-md-6">
+                <h5 class="fw-bold mb-3">Filtrar Empréstimos</h5>
+
+                <div class="btn-group">
+                    <button class="btn btn-outline-primary" onclick="filtrar('todos')">
+                        <i class="fas fa-list me-1"></i> Todos
+                    </button>
+
+                    <button class="btn btn-outline-success" onclick="filtrar('ATIVO')">
+                        <i class="fas fa-clock me-1"></i> Ativos
+                    </button>
+
+                    <button class="btn btn-outline-secondary" onclick="filtrar('FINALIZADO')">
+                        <i class="fas fa-check me-1"></i> Finalizados
+                    </button>
+
+                    <button class="btn btn-outline-danger" onclick="filtrar('ATRASADO')">
+                        <i class="fas fa-exclamation-triangle me-1"></i> Atrasados
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-6 text-md-end">
+                <div class="input-group">
+                    <input id="search" type="text" class="form-control" placeholder="Buscar por título...">
+                    <button class="btn btn-primary" onclick="buscar()">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </div>
+
+        </div>
     </div>
+
+    <!-- Se está vazio -->
+    <div th:if="${#lists.isEmpty(emprestimos)}" class="alert alert-info text-center py-5">
+        <i class="fas fa-book-open fa-3x mb-3 text-muted"></i>
+        <h4 class="text-muted">Nenhum empréstimo encontrado</h4>
+        <p class="text-muted">Você ainda não realizou nenhum empréstimo.</p>
+
+        <a th:href="@{/livros}" class="btn btn-primary">
+            <i class="fas fa-book me-1"></i> Ver Livros
+        </a>
+    </div>
+
+    <!-- Lista -->
+    <div th:unless="${#lists.isEmpty(emprestimos)}">
+        <div class="timeline">
+
+            <div class="timeline-item card card-emprestimo emprestimo-item"
+                 th:each="emp : ${emprestimos}"
+                 th:attr="data-status=${emp.status}, data-titulo=${emp.livro.titulo}">
+
+                <div class="card-body">
+                    <div class="row align-items-center">
+
+                        <!-- Capa -->
+                        <div class="col-md-1 text-center">
+                            <div th:if="${emp.livro.imagemCapa}">
+                                <img class="livro-capa" th:src="@{'/uploads/' + ${emp.livro.imagemCapa}}"
+                                     alt="Capa">
+                            </div>
+                            <div th:unless="${emp.livro.imagemCapa}" class="livro-sem-capa">
+                                <i class="fas fa-book"></i>
+                            </div>
+                        </div>
+
+                        <!-- Livro -->
+                        <div class="col-md-4">
+                            <h6 class="fw-bold" th:text="${emp.livro.titulo}"></h6>
+                            <p class="text-muted small" th:text="${emp.livro.autor}"></p>
+                            <p class="text-muted small" th:text="${emp.livro.editora}"></p>
+                        </div>
+
+                        <!-- Datas -->
+                        <div class="col-md-3">
+                            <small class="text-muted">Empréstimo:</small>
+                            <div class="fw-bold" th:text="${#temporals.format(emp.dataEmprestimo,'dd/MM/yyyy')}"></div>
+
+                            <small class="text-muted d-block mt-2">Devolução:</small>
+                            <div class="fw-bold" th:text="${#temporals.format(emp.dataDevolucao,'dd/MM/yyyy')}"></div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="col-md-2 text-center">
+                            <span class="status-badge"
+                                  th:classappend="${emp.status == 'ATIVO'} ? ' bg-success text-white' :
+                                                  ${emp.status == 'FINALIZADO'} ? ' bg-secondary text-white' :
+                                                  ' bg-danger text-white'">
+
+                                <i th:class="${emp.status == 'ATIVO'} ? 'fas fa-clock' :
+                                             ${emp.status == 'FINALIZADO'} ? 'fas fa-check' :
+                                             'fas fa-exclamation-triangle'"></i>
+
+                                <span th:text="${emp.status}"></span>
+                            </span>
+                        </div>
+
+                        <!-- Ações -->
+                        <div class="col-md-2 text-end">
+                            <a th:href="@{/livros/detalhes/{id}(id=${emp.livro.id})}"
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <!-- Renovar -->
+                            <form th:if="${emp.status == 'ATIVO'}"
+                                  th:action="@{/emprestimos/renovar/{id}(id=${emp.id})}"
+                                  method="post" class="d-inline">
+
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="btn btn-outline-success btn-sm" onclick="return confirm('Renovar empréstimo?')">
+                                    <i class="fas fa-redo"></i>
+                                </button>
+                            </form>
+
+                            <!-- Devolver -->
+                            <form th:if="${emp.status == 'ATIVO'}"
+                                  th:action="@{/emprestimos/devolver/{id}(id=${emp.id})}"
+                                  method="post" class="d-inline">
+
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
+                                <button class="btn btn-outline-warning btn-sm" onclick="return confirm('Confirmar devolução?')">
+                                    <i class="fas fa-undo"></i>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Navegação -->
+    <div class="text-center mt-4 mb-5">
+        <a th:href="@{/perfil}" class="btn btn-outline-primary me-2">
+            <i class="fas fa-arrow-left me-1"></i> Voltar ao Perfil
+        </a>
+
+        <a th:href="@{/livros}" class="btn btn-primary">
+            <i class="fas fa-book me-1"></i> Fazer Novo Empréstimo
+        </a>
+    </div>
+
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+
+    function filtrar(status) {
+        document.querySelectorAll('.emprestimo-item').forEach(item => {
+            if (status === 'todos' || item.dataset.status === status) {
+                item.style.display = 'block';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+    }
+
+    function buscar() {
+        const termo = document.querySelector('#search').value.toLowerCase();
+        document.querySelectorAll('.emprestimo-item').forEach(item => {
+            const titulo = item.dataset.titulo.toLowerCase();
+            item.style.display = titulo.includes(termo) ? 'block' : 'none';
+        });
+    }
+
+    document.querySelector('#search').addEventListener('input', buscar);
+
+    setTimeout(() => {
+        document.querySelectorAll('.alert').forEach(a => a.remove());
+    }, 4000);
+
+</script>
+
 </body>
 </html>

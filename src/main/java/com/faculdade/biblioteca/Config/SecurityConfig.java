@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 
 @Configuration
 public class SecurityConfig {
@@ -36,43 +37,61 @@ public class SecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
+    // 🔥 HANDLER PARA REDIRECIONAR ADMIN → /admin/dashboard
+    @Bean
+    public AuthenticationSuccessHandler successHandler() {
+        return (request, response, authentication) -> {
+
+            var roles = authentication.getAuthorities();
+            String redirect = "/"; // usuário comum
+
+            if (roles.stream().anyMatch(r -> r.getAuthority().equals("ROLE_ADMIN"))) {
+                redirect = "/admin/painel"; // ROTA CORRETA
+            }
+
+            response.sendRedirect(redirect);
+        };
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authenticationProvider(authProvider())
+
                 .authorizeHttpRequests(auth -> auth
-                        // 🔹 PERMITIR CADASTRO COMPLETO
+
                         .requestMatchers(HttpMethod.GET, "/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/cadastro").permitAll()
                         .requestMatchers(HttpMethod.POST, "/Usuario/cadastrar").permitAll()
 
-                        // Recursos públicos
+                        .requestMatchers("/emprestimo/confirmado").permitAll()
+
                         .requestMatchers(
                                 "/css/**", "/js/**", "/images/**", "/uploads/**",
                                 "/", "/login", "/cadastro/**",
                                 "/livros", "/livros/**"
                         ).permitAll()
 
-                        // Área administrativa
+                        .requestMatchers("/carrinho/**").authenticated()
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
 
-                        // Resto precisa de autenticação
                         .anyRequest().authenticated()
                 )
+
                 .formLogin(form -> form
                         .loginPage("/login")
-                        .defaultSuccessUrl("/", true)
+                        .successHandler(successHandler()) // **AQUI É O PULO DO GATO**
                         .permitAll()
                 )
+
                 .logout(logout -> logout
                         .logoutUrl("/logout")
                         .logoutSuccessUrl("/")
                         .permitAll()
                 )
-                // 🔹 CORREÇÃO: REMOVER A EXCEÇÃO DO CSRF PARA /cadastro
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/h2-console/**") // Apenas H2
-                )
+
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
                 .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();

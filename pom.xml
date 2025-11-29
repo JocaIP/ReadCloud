@@ -21,10 +21,12 @@
 
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-
         <!-- Web MVC -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -58,7 +60,7 @@
         <dependency>
             <groupId>com.microsoft.sqlserver</groupId>
             <artifactId>mssql-jdbc</artifactId>
-            <version>11.2.0.jre17</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- Upload de arquivos -->
@@ -68,7 +70,7 @@
             <version>1.5</version>
         </dependency>
 
-        <!-- Devtools (opcional) -->
+        <!-- Devtools -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
@@ -82,7 +84,6 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>
@@ -91,7 +92,8 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!-- REMOVA o maven-compiler-plugin ou configure corretamente -->
         </plugins>
     </build>
-
 </project>

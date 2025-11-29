@@ -4,76 +4,235 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sobre - ReadCloud</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #5d4037;
-            --secondary: #455a64;
+            --primary: #8B4513;
+            --accent: #A0522D;
+            --light: #F8F8F8;
         }
 
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
-            background-color: #f5f5f5;
+            background-color: var(--light);
         }
 
-        .navbar {
-            background: var(--secondary) !important;
-        }
-
-        .btn-primary {
-            background: var(--primary);
-            border: none;
-        }
-
-        footer {
-            background: var(--secondary);
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
+            padding: 4rem 0;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .team-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: .3s ease;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
         }
     </style>
 </head>
+
 <body>
-<nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
-<div class="container mt-5 mb-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <h1 class="text-center mb-4">Sobre a ReadCloud</h1>
+<nav class="navbar navbar-expand-lg navbar-light sticky-top"
+     style="background: rgba(255,255,255,0.95); backdrop-filter: blur(10px);">
+    <div class="container">
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h3><i class="fas fa-book text-primary me-2"></i>Nossa Missão</h3>
-                    <p class="lead">Democratizar o acesso à leitura através de uma plataforma digital inovadora e acessível.</p>
-                </div>
+        <a class="navbar-brand fw-bold" th:href="@{/}"
+           style="background: linear-gradient(135deg, var(--primary), var(--accent));
+                  -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            <i class="fas fa-cloud me-2"></i> ReadCloud
+        </a>
+
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" th:href="@{/}">Início</a>
+            <a class="nav-link" th:href="@{/livros}">Explorar Livros</a>
+            <a class="nav-link active" th:href="@{/sobre}">Sobre</a>
+            <a class="nav-link" th:href="@{/contato}">Contato</a>
+        </div>
+
+    </div>
+</nav>
+
+
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold">Sobre a ReadCloud</h1>
+                <p class="lead">Revolucionando o acesso ao conhecimento através da tecnologia</p>
             </div>
 
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h3><i class="fas fa-rocket text-primary me-2"></i>O que Fazemos</h3>
-                    <p>A ReadCloud é uma biblioteca digital que conecta leitores a milhares de livros de forma simples e eficiente.</p>
-                    <ul>
-                        <li>Catálogo digital com diversos gêneros</li>
-                        <li>Sistema de empréstimo automatizado</li>
-                        <li>Recomendações personalizadas</li>
-                        <li>Gestão inteligente de acervo</li>
-                    </ul>
-                </div>
+            <div class="col-lg-4 text-center">
+                <i class="fas fa-cloud display-1 opacity-75"></i>
             </div>
 
-            <div class="text-center mt-5">
-                <a th:href="@{/templates/public}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-home me-2"></i>Voltar ao Início
-                </a>
-                <a th:href="@{/livros}" class="btn btn-outline-primary btn-lg ms-2">
-                    <i class="fas fa-book me-2"></i>Explorar Livros
-                </a>
-            </div>
         </div>
     </div>
-</div>
+</section>
 
-<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+<section class="py-5">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-6">
+                <h2 class="fw-bold mb-4">Nossa História</h2>
+                <p class="lead">
+                    A ReadCloud nasceu da paixão por livros e da crença de que o conhecimento deve ser acessível a todos.
+                </p>
+                <p>
+                    Fundada em 2024, nossa plataforma conecta leitores apaixonados a um acervo diversificado de obras.
+                </p>
+                <p>
+                    Utilizamos tecnologia moderna para garantir que você tenha acesso aos melhores livros, onde quer que esteja.
+                </p>
+            </div>
+
+            <div class="col-lg-6">
+                <img src="https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80"
+                     alt="Biblioteca moderna"
+                     class="img-fluid rounded-3 shadow">
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4 text-center">
+
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-bullseye"></i>
+                </div>
+                <h4>Missão</h4>
+                <p>Democratizar o acesso à leitura através da tecnologia.</p>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-eye"></i>
+                </div>
+                <h4>Visão</h4>
+                <p>Ser referência em bibliotecas digitais na América Latina.</p>
+            </div>
+
+            <div class="col-md-4">
+                <div class="feature-icon">
+                    <i class="fas fa-heart"></i>
+                </div>
+                <h4>Valores</h4>
+                <p>Acessibilidade, Inovação, Qualidade e Comunidade.</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<section class="py-5">
+    <div class="container">
+
+        <div class="row text-center g-4">
+
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">1.000+</h3>
+                <p class="text-muted">Livros no Acervo</p>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">500+</h3>
+                <p class="text-muted">Leitores Ativos</p>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">24/7</h3>
+                <p class="text-muted">Disponibilidade</p>
+            </div>
+
+            <div class="col-md-3">
+                <h3 class="fw-bold text-primary">100%</h3>
+                <p class="text-muted">Satisfação Garantida</p>
+            </div>
+
+        </div>
+
+    </div>
+</section>
+
+
+<section class="py-5 bg-light">
+    <div class="container">
+
+        <h2 class="text-center fw-bold mb-5">Nossa Equipe</h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="team-card text-center p-4">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80"
+                         class="rounded-circle mb-3" width="120">
+                    <h5>João Silva</h5>
+                    <p class="text-muted">Fundador & CEO</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="team-card text-center p-4">
+                    <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?auto=format&fit=crop&w=200&q=80"
+                         class="rounded-circle mb-3" width="120">
+                    <h5>Maria Santos</h5>
+                    <p class="text-muted">CTO</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="team-card text-center p-4">
+                    <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=200&q=80"
+                         class="rounded-circle mb-3" width="120">
+                    <h5>Pedro Oliveira</h5>
+                    <p class="text-muted">Bibliotecário Chefe</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<footer class="bg-dark text-white py-4">
+    <div class="container text-center">
+
+        <h5 class="fw-bold mb-2">
+            <i class="fas fa-cloud me-2"></i> ReadCloud
+        </h5>
+
+        <p class="small">Sua biblioteca digital na nuvem</p>
+
+        <hr class="my-3">
+
+        <p class="mb-0 small">&copy; 2025 ReadCloud. Todos os direitos reservados.</p>
+
+    </div>
+</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 </html>

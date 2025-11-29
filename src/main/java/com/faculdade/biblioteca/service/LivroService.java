@@ -1,7 +1,10 @@
 package com.faculdade.biblioteca.service;
 
 import com.faculdade.biblioteca.modelo.Livro;
+import com.faculdade.biblioteca.modelo.Categoria;
 import com.faculdade.biblioteca.repository.LivroRepository;
+import com.faculdade.biblioteca.repository.CategoriaRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,102 +19,65 @@ public class LivroService {
     @Autowired
     private LivroRepository livroRepository;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
     private final Path uploadDir = Paths.get("uploads");
 
-    // ==========================
-    // LISTAR TODOS
-    // ==========================
+    // ============================================================
+    // LISTAGENS
+    // ============================================================
+
     public List<Livro> listarTodos() {
         return livroRepository.findAll();
     }
 
-    // ==========================
-    // BUSCAR POR ID
-    // ==========================
     public Optional<Livro> buscarPorId(Long id) {
         return livroRepository.findById(id);
     }
 
-    // ==========================
-    // SALVAR COM CAPA
-    // ==========================
-    public Livro salvarComCapa(Livro livro, MultipartFile capa) throws IOException {
-        if (capa != null && !capa.isEmpty()) {
-            String nomeArquivo = salvarArquivo(capa);
-            livro.setImagemCapa(nomeArquivo);
-        }
-        return livroRepository.save(livro);
+    public List<Livro> buscarDisponiveis() {
+        return livroRepository.buscarDisponiveis();
     }
 
-    // ==========================
-    // ATUALIZAR COM CAPA
-    // ==========================
-    public Livro atualizarComCapa(Long id, Livro livroAtualizado, MultipartFile capa) throws IOException {
-        Livro existente = livroRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
-
-        existente.setTitulo(livroAtualizado.getTitulo());
-        existente.setAutor(livroAtualizado.getAutor());
-        existente.setDescricao(livroAtualizado.getDescricao());
-        existente.setEditora(livroAtualizado.getEditora());
-        existente.setAnoPublicacao(livroAtualizado.getAnoPublicacao());
-        existente.setIsbn(livroAtualizado.getIsbn());
-        existente.setQuantidade(livroAtualizado.getQuantidade());
-        existente.setCategoria(livroAtualizado.getCategoria());
-
-        if (capa != null && !capa.isEmpty()) {
-            String nomeArquivo = salvarArquivo(capa);
-            existente.setImagemCapa(nomeArquivo);
-        }
-
-        return livroRepository.save(existente);
+    public List<Livro> buscarIndisponiveis() {
+        return livroRepository.buscarIndisponiveis();
     }
 
-    // ==========================
-    // EXCLUIR LIVRO
-    // ==========================
-    public void excluirPorId(Long id) {
-        if (livroRepository.existsById(id)) {
-            livroRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("Livro não encontrado para exclusão");
-        }
+    public List<Livro> buscarPorStatus(boolean disponivel) {
+        return disponivel ? buscarDisponiveis() : buscarIndisponiveis();
     }
 
-    // ==========================
-    // CONTADORES
-    // ==========================
+
+    public long contarLivrosDisponiveis() {
+        return livroRepository.buscarDisponiveis().size();
+    }
+
+    public long contarLivrosIndisponiveis() {
+        return livroRepository.buscarIndisponiveis().size();
+    }
+
     public long contarTotalLivros() {
         return livroRepository.count();
     }
 
-    public long contarLivrosDisponiveis() {
-        return livroRepository.findAll().stream()
-                .filter(l -> l.getQuantidade() != null && l.getQuantidade() > 0)
-                .count();
-    }
-
-    public long contarLivrosIndisponiveis() {
-        return livroRepository.findAll().stream()
-                .filter(l -> l.getQuantidade() != null && l.getQuantidade() == 0)
-                .count();
-    }
-
-    // ==========================
-    // MÉTODOS DE BUSCA PERSONALIZADOS
-    // ==========================
     public List<Livro> buscarLivrosPopulares() {
-        // Aqui você pode implementar lógica real (ex: mais alugados)
-        // Por enquanto, apenas retorna os 5 mais recentes
         List<Livro> todos = livroRepository.findAll();
         todos.sort(Comparator.comparing(Livro::getId).reversed());
-        return todos.stream().limit(5).toList();
+        return todos.stream().limit(8).toList();
     }
 
+    public List<Livro> listarRecentes(int limite) {
+        List<Livro> todos = livroRepository.findAll();
+        todos.sort(Comparator.comparing(Livro::getId).reversed());
+        return todos.stream().limit(limite).toList();
+    }
+
+    // ============================================================
+    // BUSCAS
+    // ============================================================
+
     public List<Livro> pesquisarLivros(String termo) {
-        if (termo == null || termo.trim().isEmpty()) {
-            return listarTodos();
-        }
         return livroRepository.findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCase(termo, termo);
     }
 
@@ -119,39 +85,149 @@ public class LivroService {
         return livroRepository.findByCategoriaId(categoriaId);
     }
 
+    public List<Livro> buscarPorIsbn(String isbn) {
+        return livroRepository.findByIsbn(isbn);
+    }
+
+    public List<Livro> buscarPorAnoPublicacao(Integer ano) {
+        return livroRepository.findByAnoPublicacao(ano);
+    }
+
+    public List<Livro> buscarPorEditora(String editora) {
+        return livroRepository.findByEditoraContainingIgnoreCase(editora);
+    }
+
     public List<Livro> buscarLivrosRelacionados(Long categoriaId, Long livroId) {
         return livroRepository.findByCategoriaIdAndIdNot(categoriaId, livroId);
     }
 
-    // ==========================
-    // BUSCAR POR TÍTULO OU AUTOR
-    // ==========================
-    public List<Livro> buscarPorTituloOuAutor(String search) {
-        return livroRepository.findByTituloContainingIgnoreCaseOrAutorContainingIgnoreCase(search, search);
-    }
+    // ============================================================
+    // BUSCA INTELIGENTE
+    // ============================================================
 
-    // ==========================
-    // UPLOAD DE CAPAS
-    // ==========================
-    private String salvarArquivo(MultipartFile arquivo) throws IOException {
-        if (!Files.exists(uploadDir)) {
-            Files.createDirectories(uploadDir);
+    public List<Livro> buscaInteligente(String termo) {
+
+        if (termo == null || termo.trim().isEmpty())
+            return listarTodos();
+
+        termo = termo.trim();
+
+        // ID direto
+        if (termo.matches("\\d+")) {
+            Optional<Livro> porId = buscarPorId(Long.parseLong(termo));
+            if (porId.isPresent()) return List.of(porId.get());
         }
 
-        String extensao = getExtensao(arquivo.getOriginalFilename());
-        String nomeArquivo = UUID.randomUUID() + "." + extensao;
+        // ISBN
+        List<Livro> isbn = buscarPorIsbn(termo);
+        if (!isbn.isEmpty()) return isbn;
 
-        Path destino = uploadDir.resolve(nomeArquivo);
+        // Ano
+        try {
+            Integer ano = Integer.parseInt(termo);
+            List<Livro> porAno = buscarPorAnoPublicacao(ano);
+            if (!porAno.isEmpty()) return porAno;
+        } catch (Exception ignored) {}
+
+        // Filtro avançado geral
+        return livroRepository.buscarAvancado(termo);
+    }
+
+    // ============================================================
+    // FILTRO COMPLETO (BANCO)
+    // ============================================================
+
+    public List<Livro> filtrarLivros(String busca, Long categoriaId, String disponibilidade) {
+
+        if ((busca == null || busca.isBlank()) &&
+                categoriaId == null &&
+                (disponibilidade == null || disponibilidade.isBlank())) {
+
+            return listarTodos();
+        }
+
+        return livroRepository.filtrarLivros(busca, categoriaId, disponibilidade);
+    }
+
+    // ============================================================
+    // FILTRO CLIENT-SIDE (Java)
+    // ============================================================
+
+    public List<Livro> buscarComFiltros(String titulo, String autor, String editora,
+                                        Integer anoMin, Integer anoMax) {
+
+        return livroRepository.findAll().stream()
+                .filter(l -> titulo == null || titulo.isBlank() || l.getTitulo().toLowerCase().contains(titulo.toLowerCase()))
+                .filter(l -> autor == null || autor.isBlank() || l.getAutor().toLowerCase().contains(autor.toLowerCase()))
+                .filter(l -> editora == null || editora.isBlank() || l.getEditora().toLowerCase().contains(editora.toLowerCase()))
+                .filter(l -> anoMin == null || (l.getAnoPublicacao() != null && l.getAnoPublicacao() >= anoMin))
+                .filter(l -> anoMax == null || (l.getAnoPublicacao() != null && l.getAnoPublicacao() <= anoMax))
+                .toList();
+    }
+
+    // ============================================================
+    // UPLOAD DE IMAGENS
+    // ============================================================
+
+    public Livro salvarComCapa(Livro livro, MultipartFile capa) throws IOException {
+        if (capa != null && !capa.isEmpty()) {
+            livro.setImagemCapa(salvarArquivo(capa));
+        }
+        return livroRepository.save(livro);
+    }
+
+    @Transactional
+    public Livro atualizarComCapa(Long id, Livro atual, MultipartFile capa) throws IOException {
+
+        Livro existente = livroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+
+        existente.setTitulo(atual.getTitulo());
+        existente.setAutor(atual.getAutor());
+        existente.setDescricao(atual.getDescricao());
+        existente.setEditora(atual.getEditora());
+        existente.setAnoPublicacao(atual.getAnoPublicacao());
+        existente.setIsbn(atual.getIsbn());
+        existente.setQuantidade(atual.getQuantidade());
+        existente.setCategoria(atual.getCategoria());
+
+        if (capa != null && !capa.isEmpty()) {
+            existente.setImagemCapa(salvarArquivo(capa));
+        }
+
+        return livroRepository.save(existente);
+    }
+
+    // ============================================================
+    // EXCLUSÃO
+    // ============================================================
+
+    public void excluir(Long id) {
+        Livro livro = buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Livro não encontrado"));
+        livroRepository.delete(livro);
+    }
+
+    // ============================================================
+    // UTILITÁRIOS DE ARQUIVO
+    // ============================================================
+
+    private String salvarArquivo(MultipartFile arquivo) throws IOException {
+
+        if (!Files.exists(uploadDir))
+            Files.createDirectories(uploadDir);
+
+        String extensao = getExtensao(arquivo.getOriginalFilename());
+        String nome = UUID.randomUUID() + "." + extensao;
+
+        Path destino = uploadDir.resolve(nome);
         Files.copy(arquivo.getInputStream(), destino, StandardCopyOption.REPLACE_EXISTING);
 
-        return nomeArquivo;
+        return nome;
     }
 
     private String getExtensao(String nome) {
-        return nome != null && nome.contains(".") ? nome.substring(nome.lastIndexOf('.') + 1) : "jpg";
+        if (nome == null || !nome.contains(".")) return "jpg";
+        return nome.substring(nome.lastIndexOf('.') + 1);
     }
-
-    public Object contarLivrosIndisponis() {
-        return  livroRepository.findAll().stream().filter(l -> l.getQuantidade() > 0);
-    };
 }
