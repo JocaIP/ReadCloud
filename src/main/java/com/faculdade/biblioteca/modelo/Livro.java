@@ -24,6 +24,9 @@ public class Livro {
     @Column(nullable = false)
     private Integer quantidade = 0;
 
+    @Column(name = "quantidade_total", nullable = false)
+    private Integer quantidadeTotal = 0;
+
     @Column(length = 20)
     private String isbn;
 
@@ -62,6 +65,9 @@ public class Livro {
     public Integer getQuantidade() { return quantidade; }
     public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
 
+    public Integer getQuantidadeTotal() { return quantidadeTotal; }
+    public void setQuantidadeTotal(Integer quantidadeTotal) { this.quantidadeTotal = quantidadeTotal; }
+
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
 
@@ -85,5 +91,24 @@ public class Livro {
 
     public boolean isDisponivel() {
         return this.quantidade != null && this.quantidade > 0;
+    }
+
+    /**
+     * Verifica se há exemplares emprestados
+     */
+    public boolean hasExemplaresEmprestados() {
+        return this.quantidadeTotal != null &&
+                this.quantidade != null &&
+                this.quantidade < this.quantidadeTotal;
+    }
+
+    /**
+     * Retorna a quantidade de exemplares emprestados
+     */
+    public Integer getQuantidadeEmprestada() {
+        if (this.quantidadeTotal == null || this.quantidade == null) {
+            return 0;
+        }
+        return this.quantidadeTotal - this.quantidade;
     }
 }

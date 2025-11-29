@@ -3,54 +3,96 @@ package com.faculdade.biblioteca.repository;
 import com.faculdade.biblioteca.modelo.Emprestimo;
 import com.faculdade.biblioteca.modelo.Livro;
 import com.faculdade.biblioteca.modelo.Usuario;
+import com.faculdade.biblioteca.modelo.StatusEmprestimo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
 
-    // 🔹 Verifica se o usuário já possui um empréstimo ativo do mesmo livro
     boolean existsByUsuarioAndLivroAndDevolvidoFalse(Usuario usuario, Livro livro);
 
-    // 🔹 Busca todos os empréstimos de um usuário
     List<Emprestimo> findByUsuarioId(Long usuarioId);
 
-    // 🔹 Busca todos os empréstimos ativos (não devolvidos)
     List<Emprestimo> findByUsuarioIdAndDevolvidoFalse(Long usuarioId);
 
-    // 🔹 Busca histórico (já devolvidos)
     List<Emprestimo> findByUsuarioIdAndDevolvidoTrue(Long usuarioId);
 
-    // 🔹 Busca atrasados (prazo vencido e ainda não devolvidos)
-    List<Emprestimo> findByUsuarioIdAndDataPrevistaDevolucaoBeforeAndDevolvidoFalse(
-            Long usuarioId, LocalDate dataAtual);
+    @Query("""
+        SELECT e FROM Emprestimo e
+        WHERE e.usuario.id = :usuarioId
+        AND e.dataDevolucao < :dataAtual
+        AND e.devolvido = false
+    """)
+    List<Emprestimo> findAtrasadosPorUsuario(
+            @Param("usuarioId") Long usuarioId,
+            @Param("dataAtual") LocalDateTime dataAtual
+    );
 
-    // 🔹 Conta empréstimos atrasados (para painel admin)
-    long countByDataPrevistaDevolucaoBeforeAndDevolvidoFalse(LocalDate dataAtual);
+    @Query("""
+        SELECT COUNT(e) FROM Emprestimo e
+        WHERE e.dataDevolucao < :dataAtual
+        AND e.devolvido = false
+    """)
+    long countByDataPrevistaDevolucaoBeforeAndDevolvidoFalse(
+            @Param("dataAtual") LocalDateTime dataAtual
+    );
 
-    // ==============================
-    // NOVOS MÉTODOS PARA AVALIAÇÕES
-    // ==============================
+    Optional<Emprestimo> findTopByUsuarioIdAndLivroIdAndDevolvidoFalseOrderByDataEmprestimoDesc(
+            Long usuarioId, Long livroId
+    );
 
-    // 🔹 Buscar empréstimo ativo por usuário e livro
-    @Query("SELECT e FROM Emprestimo e WHERE e.usuario.id = :usuarioId AND e.livro.id = :livroId AND e.devolvido = false")
-    Optional<Emprestimo> findTopByUsuarioIdAndLivroIdAndDevolvidoFalse(@Param("usuarioId") Long usuarioId, @Param("livroId") Long livroId);
+    List<Emprestimo> findByUsuarioIdAndLivroIdAndDevolvidoTrue(Long usuarioId, Long livroId);
 
-    // 🔹 Buscar empréstimos concluídos por usuário e livro
-    @Query("SELECT e FROM Emprestimo e WHERE e.usuario.id = :usuarioId AND e.livro.id = :livroId AND e.devolvido = true")
-    List<Emprestimo> findByUsuarioIdAndLivroIdAndDevolvidoTrue(@Param("usuarioId") Long usuarioId, @Param("livroId") Long livroId);
+    boolean existsByUsuarioIdAndLivroIdAndDevolvidoTrue(Long usuarioId, Long livroId);
 
-    // 🔹 Buscar empréstimo por ID verificando se pertence ao usuário
-    @Query("SELECT e FROM Emprestimo e WHERE e.id = :emprestimoId AND e.usuario.id = :usuarioId")
-    Optional<Emprestimo> findByIdAndUsuarioId(@Param("emprestimoId") Long emprestimoId, @Param("usuarioId") Long usuarioId);
+    Optional<Emprestimo> findByIdAndUsuarioId(Long emprestimoId, Long usuarioId);
 
-    // 🔹 Verificar se usuário já alugou o livro (tem empréstimo concluído)
-    @Query("SELECT COUNT(e) > 0 FROM Emprestimo e WHERE e.usuario.id = :usuarioId AND e.livro.id = :livroId AND e.devolvido = true")
-    boolean existsByUsuarioIdAndLivroIdAndDevolvidoTrue(@Param("usuarioId") Long usuarioId, @Param("livroId") Long livroId);
+    List<Emprestimo> findByStatus(StatusEmprestimo status);
+
+    @Query("""
+        SELECT e FROM Emprestimo e
+        WHERE e.status = 'ATIVO'
+        AND e.dataDevolucao < :now
+    """)
+    List<Emprestimo> findEmprestimosAtrasados(@Param("now") LocalDateTime now);
+
+    @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.status = 'ATIVO'")
+    Long countEmprestimosAtivos();
+
+    @Query("SELECT COUNT(e) FROM Emprestimo e WHERE e.status = 'ATRASADO'")
+    Long countEmprestimosAtrasados();
+
+    @Query("""
+        SELECT COUNT(e) FROM Emprestimo e
+        WHERE e.status = 'FINALIZADO'
+        AND MONTH(e.dataDevolucaoReal) = MONTH(CURRENT_DATE)
+        AND YEAR(e.dataDevolucaoReal) = YEAR(CURRENT_DATE)
+    """)
+    Long countEmprestimosFinalizadosEsteMes();
+
+    @Query("""
+        SELECT COUNT(e) FROM Emprestimo e
+        WHERE e.usuario.id = :usuarioId
+        AND e.status IN ('ATIVO','ATRASADO')
+    """)
+    Long countEmprestimosAtivosPorUsuario(@Param("usuarioId") Long usuarioId);
+
+    @Query("""
+        SELECT e FROM Emprestimo e
+        WHERE LOWER(e.usuario.nome) LIKE LOWER(CONCAT('%', :termo, '%'))
+        OR LOWER(e.livro.titulo) LIKE LOWER(CONCAT('%', :termo, '%'))
+        OR CAST(e.id AS string) LIKE CONCAT('%', :termo, '%')
+    """)
+    List<Emprestimo> buscarPorTermo(@Param("termo") String termo);
+
+    List<Emprestimo> findByUsuarioIdAndStatus(Long usuarioId, StatusEmprestimo status);
+    Optional<Emprestimo> findTopByUsuarioIdOrderByDataEmprestimoDesc(Long usuarioId);
+
 }

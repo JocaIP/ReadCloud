@@ -38,4 +38,8 @@ public class LivroRelatorio {
 
     public Double getTaxaRetorno() { return taxaRetorno; }
     public void setTaxaRetorno(Double taxaRetorno) { this.taxaRetorno = taxaRetorno; }
+
+    public static Long getTotalAlugado(LivroRelatorio rel) {
+        return rel.getTotalEmprestimos();
+    }
 }

@@ -186,6 +186,50 @@
             color: white;
         }
 
+        /* Botão Carrinho */
+        .btn-cart {
+            background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(210, 105, 30, 0.2);
+            position: relative;
+        }
+
+        .btn-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(210, 105, 30, 0.4);
+            background: linear-gradient(135deg, #CD853F 0%, #D2691E 100%);
+            color: white;
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: linear-gradient(135deg, #FF6B6B 0%, #EE5A24 100%);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
         /* Hero Section */
         .hero {
             padding: 6rem 0 4rem;
@@ -251,64 +295,6 @@
             transform: scale(1.05);
         }
 
-        /* Floating Books */
-        .floating-books {
-            position: absolute;
-            right: 5%;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 300px;
-            height: 300px;
-            display: none;
-        }
-
-        @media (min-width: 1200px) {
-            .floating-books {
-                display: block;
-            }
-        }
-
-        .book {
-            position: absolute;
-            width: 80px;
-            height: 100px;
-            background: white;
-            border-radius: 5px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            color: var(--primary);
-            animation: float-book 6s infinite ease-in-out;
-        }
-
-        .book:nth-child(1) {
-            top: 10%;
-            left: 10%;
-            animation-delay: 0s;
-            background: linear-gradient(135deg, #DEB887 0%, #F5DEB3 100%);
-        }
-
-        .book:nth-child(2) {
-            top: 30%;
-            right: 20%;
-            animation-delay: 1s;
-            background: linear-gradient(135deg, #BC8F8F 0%, #F0E68C 100%);
-        }
-
-        .book:nth-child(3) {
-            bottom: 20%;
-            left: 20%;
-            animation-delay: 2s;
-            background: linear-gradient(135deg, #D2B48C 0%, #F5F5DC 100%);
-        }
-
-        @keyframes float-book {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(5deg); }
-        }
-
         /* Popular Books */
         .popular-section {
             padding: 4rem 0;
@@ -350,7 +336,6 @@
 
         .book-cover {
             height: 200px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -358,6 +343,18 @@
             font-weight: bold;
             position: relative;
             overflow: hidden;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        .book-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .book-card:hover .book-cover img {
+            transform: scale(1.05);
         }
 
         .book-cover::after {
@@ -405,17 +402,6 @@
             color: white;
             position: relative;
             overflow: hidden;
-        }
-
-        .stats::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: cover;
         }
 
         .stat-card {
@@ -557,28 +543,6 @@
                 padding-top: 1rem;
             }
         }
-
-        @media (min-width: 769px) {
-            .auth-container {
-                flex-direction: row;
-                align-items: center;
-            }
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
-        .custom-toast {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: none;
-        }
     </style>
 </head>
 <body>
@@ -589,10 +553,9 @@
     <div class="cloud"></div>
 </div>
 
-<!-- Navbar Corrigido COM BOTÃO DE PERFIL E LINKS CORRETOS -->
+<!-- Navbar -->
 <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container">
-        <!-- 🔹 CORREÇÃO: Link corrigido para "/" -->
         <a class="navbar-brand" th:href="@{/}">
             <i class="fas fa-cloud me-2"></i>ReadCloud
         </a>
@@ -604,7 +567,6 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <!-- 🔹 CORREÇÃO: Link corrigido para "/" -->
                     <a class="nav-link active" th:href="@{/}">Início</a>
                 </li>
                 <li class="nav-item">
@@ -619,22 +581,11 @@
             </ul>
 
             <div class="auth-container">
-                <!-- Usuário autenticado (não anônimo) -->
-                <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-2">
-                    <!-- Botão ADMIN - VISÍVEL APENAS PARA ADMIN -->
-                    <div sec:authorize="hasRole('ADMIN')">
-                        <a th:href="@{/admin/painel}" class="btn btn-admin btn-sm me-2">
-                            <i class="fas fa-tools me-1"></i> Painel Admin
-                        </a>
-                    </div>
-
-                    <!-- 🔹 BOTÃO DE PERFIL - VISÍVEL PARA TODOS OS USUÁRIOS AUTENTICADOS -->
-                    <a th:href="@{/perfil}" class="btn btn-profile btn-sm me-2">
-                        <i class="fas fa-user me-1"></i> Meu Perfil
+                <!-- ADMIN -->
+                <div sec:authorize="hasRole('ADMIN')" class="d-flex align-items-center gap-2">
+                    <a th:href="@{/admin/painel}" class="btn btn-admin btn-sm me-2">
+                        <i class="fas fa-tools me-1"></i> Painel Admin
                     </a>
-
-<!--                    <span class="navbar-text me-2">Olá, <span sec:authentication="name">Usuário</span></span>-->
-
                     <form th:action="@{/logout}" method="post" class="d-inline">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                         <button type="submit" class="btn btn-outline-primary btn-sm">
@@ -643,12 +594,29 @@
                     </form>
                 </div>
 
-                <!-- Usuário não autenticado -->
+                <!-- USUÁRIO COMUM -->
+                <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')" class="d-flex align-items-center gap-2">
+                    <a th:href="@{/perfil/dashboard}" class="btn btn-profile btn-sm me-2">
+                        <i class="fas fa-user me-1"></i> Meu Perfil
+                    </a>
+                    <a th:href="@{/carrinho}" class="btn btn-cart btn-sm me-2 position-relative">
+                        <i class="fas fa-shopping-cart me-1"></i> Carrinho
+                        <span th:if="${carrinhoCount > 0}" class="cart-badge" th:text="${carrinhoCount}">0</span>
+                    </a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-sign-out-alt me-1"></i> Sair
+                        </button>
+                    </form>
+                </div>
+
+                <!-- NÃO AUTENTICADO -->
                 <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
-                    <a class="nav-link" th:href="@{/login}">
+                    <a th:href="@{/login}" class="nav-link">
                         <i class="fas fa-sign-in-alt me-1"></i> Entrar
                     </a>
-                    <a class="btn btn-primary" th:href="@{/cadastro}">
+                    <a th:href="@{/cadastro}" class="btn btn-primary btn-sm">
                         <i class="fas fa-user-plus me-1"></i> Cadastrar
                     </a>
                 </div>
@@ -657,7 +625,7 @@
     </div>
 </nav>
 
-<!-- Hero Section -->
+<!-- Hero -->
 <section class="hero">
     <div class="container">
         <div class="row align-items-center">
@@ -665,28 +633,21 @@
                 <h1 class="display-4 fw-bold">Sua Biblioteca na Nuvem</h1>
                 <p class="lead">Acesse milhares de livros de qualquer lugar, a qualquer momento. A ReadCloud traz o conhecimento até você com a praticidade da nuvem.</p>
                 <div class="search-box">
-                    <!-- busca para controller -->
                     <form th:action="@{/livros}" method="get" class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Buscar livros, autores, categorias..." th:value="${param.search}">
-                        <button class="btn" type="submit">
-                            <i class="fas fa-search me-1"></i> Buscar
-                        </button>
+                        <input type="text" name="pesquisa" class="form-control" placeholder="Buscar livros, autores, categorias..." th:value="${param.pesquisa}">
+                        <button class="btn" type="submit"><i class="fas fa-search me-1"></i> Buscar</button>
                     </form>
                 </div>
                 <div class="mt-4">
-                    <a th:href="@{/livros}" class="btn btn-primary me-2">
-                        <i class="fas fa-book-open me-1"></i> Explorar Biblioteca
-                    </a>
-                    <a th:href="@{/sobre}" class="btn btn-outline-secondary">
-                        <i class="fas fa-info-circle me-1"></i> Saiba Mais
-                    </a>
+                    <a th:href="@{/livros}" class="btn btn-primary me-2"><i class="fas fa-book-open me-1"></i> Explorar Biblioteca</a>
+                    <a th:href="@{/sobre}" class="btn btn-outline-secondary"><i class="fas fa-info-circle me-1"></i> Saiba Mais</a>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Livros Populares -->
+<!-- Popular -->
 <section class="popular-section">
     <div class="container">
         <div class="section-header">
@@ -695,92 +656,83 @@
             <p class="text-muted">Descobrir os livros mais populares da nossa comunidade</p>
         </div>
 
-        <!-- mensagens sucesso / erro (renderizadas pelo controller) -->
         <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
         <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
 
         <div class="row g-4">
-            <!-- iteração de livros fornecida pelo controller -->
             <div class="col-md-6 col-lg-3" th:each="livro : ${livros}">
                 <div class="book-card">
                     <div class="book-cover">
-                            <span class="book-badge badge" th:classappend="${livro.quantidade > 0} ? ' bg-success' : ' bg-danger'"
-                                  th:text="${livro.quantidade > 0} ? 'Disponível' : 'Indisponível'"></span>
-                        <!-- capa / ícone -->
-                        <div>
-                            <i class="fas fa-book"></i>
-                        </div>
+                        <span class="book-badge badge" th:classappend="${livro.quantidade > 0} ? ' bg-success' : ' bg-danger'"
+                              th:text="${livro.quantidade > 0} ? 'Disponível' : 'Indisponível'"></span>
+
+                        <img th:if="${livro.imagemCapa != null && !livro.imagemCapa.isEmpty()}"
+                             th:src="@{'/uploads/' + ${livro.imagemCapa}}"
+                             th:alt="${livro.titulo}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <i class="fas fa-book fa-3x" th:if="${livro.imagemCapa == null || livro.imagemCapa.isEmpty()}" style="display:flex;"></i>
                     </div>
+
                     <div class="card-body">
                         <h5 class="card-title" th:text="${livro.titulo}">Título do Livro</h5>
                         <p class="card-text text-muted" th:text="${livro.autor}">Autor</p>
                         <div class="book-stats">
                             <small class="text-muted" th:text="'Qtd: ' + ${livro.quantidade}">Qtd: 5</small>
                             <span class="book-rating">
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="fas fa-star text-warning"></i>
-                                    <i class="far fa-star text-warning"></i>
-                                </span>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="far fa-star text-warning"></i>
+                            </span>
                         </div>
                     </div>
+
                     <div class="book-actions">
                         <div class="d-grid gap-2">
-                            <!-- Ver Detalhes - SEMPRE disponível -->
-                            <a th:href="@{/livros/detalhes/{id}(id=${livro.id})}" class="btn btn-outline-primary btn-sm">
+                            <a th:href="@{/livros/detalhes/{id}(id=${livro.id})}" class="btn btn-outline-primary btn-sm w-100">
                                 <i class="fas fa-eye me-1"></i> Ver Detalhes
                             </a>
-                            <div class="d-flex gap-2">
-                                <!-- Alugar (apenas se quantidade > 0) -->
-                                <div th:if="${livro.quantidade > 0}" class="w-50">
-                                    <!-- Usuário autenticado: mostra formulário normal -->
-                                    <form th:action="@{/livros/alugar/{id}(id=${livro.id})}" method="post" sec:authorize="isAuthenticated()" class="h-100">
+
+                            <!-- Usuario autenticado e não admin: usar link GET para adicionar ao carrinho -->
+                            <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')" class="d-flex gap-2 mt-2">
+                                <div class="w-100">
+                                    <form th:action="@{/carrinho/adicionar/{id}(id=${livro.id})}" method="post">
                                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <button type="submit" class="btn btn-success btn-sm w-100 h-100">
+                                        <button type="submit" class="btn btn-alugar btn-sm w-100">
                                             <i class="fas fa-hand-holding me-1"></i> Alugar
                                         </button>
                                     </form>
-                                    <!-- Usuário NÃO autenticado: redireciona para login -->
-                                    <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="btn btn-success btn-sm w-100 h-100 d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-hand-holding me-1"></i> Alugar
-                                    </a>
+                                    <button th:if="${livro.quantidade <= 0}" class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                        <i class="fas fa-ban me-1"></i> Indisponível
+                                    </button>
                                 </div>
-                                <!-- Botão indisponível -->
-                                <button th:if="${livro.quantidade <= 0}" class="btn btn-outline-secondary btn-sm w-50" disabled>
-                                    <i class="fas fa-ban me-1"></i> Indisponível
-                                </button>
+                            </div>
 
-                                <!-- Favoritar / Desejar -->
-                                <div class="w-50">
-                                    <!-- Usuário autenticado: mostra formulário normal -->
-                                    <form th:action="@{/livros/desejar/{id}(id=${livro.id})}" method="post" sec:authorize="isAuthenticated()" class="h-100">
-                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                        <button type="submit" class="btn btn-outline-danger btn-sm w-100 h-100">
-                                            <i class="fas fa-heart me-1"></i> Favoritar
-                                        </button>
-                                    </form>
-                                    <!-- Usuário NÃO autenticado: redireciona para login -->
-                                    <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="btn btn-outline-danger btn-sm w-100 h-100 d-flex align-items-center justify-content-center">
-                                        <i class="fas fa-heart me-1"></i> Favoritar
-                                    </a>
-                                </div>
+                            <!-- Favoritar (POST) - apenas para usuário comum -->
+                            <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')" class="mt-2">
+                                <form th:action="@{/livros/desejar/{id}(id=${livro.id})}" method="post" id="favoritoForm-${livro.id}" class="d-grid">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-favorite btn-sm w-100"><i class="fas fa-heart me-1"></i> Favoritar</button>
+                                </form>
+                            </div>
+
+                            <!-- Usuário não autenticado: botões levam ao login; JS will save redirect -->
+                            <div sec:authorize="!isAuthenticated()" class="d-flex gap-2 mt-2">
+                                <a th:href="@{/login}" class="btn btn-alugar btn-sm w-50"> <i class="fas fa-hand-holding me-1"></i> Alugar</a>
+                                <a th:href="@{/login}" class="btn btn-outline-danger btn-sm w-50"> <i class="fas fa-heart me-1"></i> Favoritar</a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- fallback quando não houver livros -->
             <div class="col-12" th:if="${#lists.isEmpty(livros)}">
                 <div class="alert alert-info">Nenhum livro encontrado.</div>
             </div>
         </div>
 
         <div class="text-center mt-5">
-            <a th:href="@{/livros}" class="btn btn-primary">
-                <i class="fas fa-book me-1"></i> Ver Todos os Livros
-            </a>
+            <a th:href="@{/livros}" class="btn btn-primary"><i class="fas fa-book me-1"></i> Ver Todos os Livros</a>
         </div>
     </div>
 </section>
@@ -790,28 +742,19 @@
     <div class="container">
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-book"></i></div>
                     <h3 class="fw-bold" th:text="${totalLivros != null ? totalLivros : 0}">1,247</h3>
                     <p class="mb-0">Livros no Acervo</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div>
                     <h3 class="fw-bold" th:text="${livrosDisponiveis != null ? livrosDisponiveis : 0}">856</h3>
                     <p class="mb-0">Disponíveis para Empréstimo</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div>
                     <h3 class="fw-bold" th:text="${livrosEmprestados != null ? livrosEmprestados : 0}">89</h3>
                     <p class="mb-0">Empréstimos Ativos</p>
                 </div>
@@ -830,28 +773,19 @@
         </div>
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-cloud"></i>
-                    </div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-cloud"></i></div>
                     <h4>Acesso na Nuvem</h4>
                     <p class="text-muted">Acesse sua biblioteca de qualquer dispositivo, em qualquer lugar. Seus livros sempre disponíveis.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-search"></i></div>
                     <h4>Busca Inteligente</h4>
                     <p class="text-muted">Encontre exatamente o que procura com nosso sistema de busca avançada e filtros personalizados.</p>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bell"></i>
-                    </div>
+                <div class="feature-card"><div class="feature-icon"><i class="fas fa-bell"></i></div>
                     <h4>Notificações</h4>
                     <p class="text-muted">Receba alertas sobre prazos, disponibilidade de livros e novidades do acervo.</p>
                 </div>
@@ -865,9 +799,7 @@
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-6 mb-4 mb-md-0">
-                <h4 class="fw-bold">
-                    <i class="fas fa-cloud me-2"></i> ReadCloud
-                </h4>
+                <h4 class="fw-bold"><i class="fas fa-cloud me-2"></i> ReadCloud</h4>
                 <p class="mb-0">Sua biblioteca digital na nuvem</p>
             </div>
             <div class="col-md-6 text-md-end text-center">
@@ -875,80 +807,102 @@
                     <a th:href="@{/sobre}" class="me-3">Sobre</a>
                     <a th:href="@{/contato}" class="me-3">Contato</a>
                     <a th:href="@{/livros}" class="me-3">Livros</a>
-                    <a href="#">Ajuda</a>
                 </div>
             </div>
         </div>
         <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
-        <div class="text-center">
-            <p class="mb-0 small">&copy; 2024 ReadCloud. Todos os direitos reservados.</p>
-        </div>
+        <div class="text-center"><p class="mb-0 small">&copy; 2025 ReadCloud. Todos os direitos reservados.</p></div>
     </div>
 </footer>
 
-<!-- Floating Action Button -->
-<div class="floating-action">
-    <button class="floating-btn" data-bs-toggle="tooltip" data-bs-placement="left" title="Precisa de ajuda?">
-        <i class="fas fa-question"></i>
-    </button>
-</div>
-
 <!-- Toast Container -->
-<div class="toast-container">
-    <!-- Toasts will be dynamically added here -->
-</div>
+<div class="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Initialize tooltips
+    // tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
 
-    // Show toast notifications for success/error messages
     document.addEventListener('DOMContentLoaded', function() {
         // Auto-dismiss alerts after 5 seconds
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
+        document.querySelectorAll('.alert').forEach(alert => {
             setTimeout(() => {
-                if (alert.classList.contains('show')) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }
+                try { new bootstrap.Alert(alert).close(); } catch(e){}
             }, 5000);
         });
 
-        // Adicionar mensagem informativa quando usuário não autenticado clicar em ações
+        // Save redirect when clicking login links
         document.querySelectorAll('a[href="/login"]').forEach(link => {
-            link.addEventListener('click', function(e) {
-                // Você pode adicionar um localStorage ou sessionStorage para mostrar mensagem após login
+            link.addEventListener('click', function() {
                 sessionStorage.setItem('redirectAfterLogin', window.location.href);
             });
         });
+
+        // FAVORITOS (POST com CSRF)
+        document.querySelectorAll('form[id^="favoritoForm-"]').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                showToast('Livro adicionado aos favoritos! ❤️', 'success');
+
+                const btn = this.querySelector('button');
+                if (btn) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-heart me-1"></i> Favoritado';
+                    btn.classList.remove('btn-favorite');
+                    btn.classList.add('btn-outline-danger');
+                }
+
+                setTimeout(() => this.submit(), 900);
+            });
+        });
+
+        // ====== CARRINHO CORRIGIDO — SEM preventDefault() ======
+        document.querySelectorAll('a.add-to-cart').forEach(a => {
+            a.addEventListener('click', function() {
+                // animação rápida (somente visual)
+                this.innerHTML = '<i class="fas fa-check me-1"></i> Adicionado';
+                this.classList.remove('btn-alugar');
+                this.classList.add('btn-success');
+
+                showToast('Livro adicionado ao carrinho! 📚', 'success');
+
+                // NÃO usar preventDefault
+                // NÃO redirecionar manualmente
+                // O browser vai seguir o link normalmente
+            });
+        });
+        // =======================================================
     });
 
+    // Função de Toast Bonito
     function showToast(message, type) {
-        const toastContainer = document.querySelector('.toast-container');
-        const toastId = 'toast-' + Date.now();
+        const container = document.querySelector('.toast-container');
+        const id = 'toast-' + Date.now();
+
         const toastHTML = `
-                <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
+            <div id="${id}"
+                 class="toast align-items-center text-white bg-${type} border-0 custom-toast"
+                 role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto"
+                            data-bs-dismiss="toast"></button>
                 </div>
-            `;
-        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement);
+            </div>`;
+
+        container.insertAdjacentHTML('beforeend', toastHTML);
+
+        const element = document.getElementById(id);
+        const toast = new bootstrap.Toast(element);
         toast.show();
-        toastElement.addEventListener('hidden.bs.toast', function() {
-            toastElement.remove();
-        });
+
+        element.addEventListener('hidden.bs.toast', () => element.remove());
     }
 </script>
+
 </body>
 </html>

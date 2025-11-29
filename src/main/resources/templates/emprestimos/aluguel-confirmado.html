@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aluguel Confirmado - ReadCloud</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #8B4513;
+            --accent: #A0522D;
+            --success: #28a745;
+            --light: #F8F6F2;
+        }
+        body { background-color: var(--light); font-family: 'Segoe UI', sans-serif; }
+        .confirmation-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .confirmation-header {
+            background: linear-gradient(135deg, var(--success), #20c997);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .book-cover {
+            width: 110px;
+            height: 150px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .info-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border-left: 4px solid var(--primary);
+            margin-bottom: 1.2rem;
+        }
+        .deadline-box {
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .btn-continue {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-light bg-white shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" th:href="@{/}">
+            <i class="fas fa-cloud me-2" style="color: var(--primary);"></i>ReadCloud
+        </a>
+        <div>
+            <a class="nav-link d-inline" th:href="@{/livros}">
+                <i class="fas fa-arrow-left me-1"></i> Voltar para Livros
+            </a>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="confirmation-card">
+                <div class="confirmation-header">
+                    <div class="book-cover"><i class="fas fa-book"></i></div>
+                    <h2><i class="fas fa-check-circle me-2"></i>Aluguel Confirmado!</h2>
+                    <p class="mb-0">Você alugou <strong th:text="${emprestimos.size()}"></strong> livro(s)</p>
+                </div>
+
+                <div class="p-4">
+
+                    <!-- LISTA DE LIVROS ALUGADOS -->
+                    <div th:each="emp : ${emprestimos}" class="info-box">
+
+                        <h4 class="mb-3">
+                            <i class="fas fa-book me-2 text-primary"></i>
+                            <span th:text="${emp.livro.titulo}"></span>
+                        </h4>
+
+                        <p><strong>Autor:</strong> <span th:text="${emp.livro.autor}"></span></p>
+
+                        <p th:if="${emp.livro.categoria}">
+                            <strong>Categoria:</strong> <span th:text="${emp.livro.categoria.nome}"></span>
+                        </p>
+
+                        <p th:unless="${emp.livro.categoria}">
+                            <strong>Categoria:</strong> Não informada
+                        </p>
+
+                        <hr>
+
+                        <p><strong>Data do Empréstimo:</strong>
+                            <span th:text="${#temporals.format(emp.dataEmprestimo, 'dd/MM/yyyy')}"></span>
+                        </p>
+
+                        <p><strong>Prazo:</strong>
+                            <span th:text="${prazoDias} + ' dias'"></span>
+                        </p>
+
+                        <p><strong>Data Limite:</strong>
+                            <span th:text="${#temporals.format(emp.dataDevolucao, 'dd/MM/yyyy')}"></span>
+                        </p>
+
+                        <p><strong>Multa por Atraso:</strong>
+                            R$ <span th:text="${#numbers.formatDecimal(multaDiaria, 0, 2)}"></span> / dia
+                        </p>
+                    </div>
+
+                    <!-- AVISO -->
+                    <div class="deadline-box mt-4">
+                        <h4 class="text-warning mb-2">
+                            <i class="fas fa-exclamation-circle me-2"></i>Atenção!
+                        </h4>
+                        <p class="mb-1">Evite multas devolvendo os livros dentro do prazo.</p>
+                    </div>
+
+                    <!-- AÇÕES -->
+                    <div class="text-center mt-4">
+                        <a th:href="@{/perfil}" class="btn btn-continue me-2">
+                            <i class="fas fa-user me-1"></i> Ver Meus Empréstimos
+                        </a>
+
+                        <a th:href="@{/livros}" class="btn btn-outline-primary">
+                            <i class="fas fa-book me-1"></i> Alugar Outro Livro
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

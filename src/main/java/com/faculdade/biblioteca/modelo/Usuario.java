@@ -2,7 +2,7 @@ package com.faculdade.biblioteca.modelo;
 
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
-
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -139,6 +139,9 @@ public class Usuario {
     // 🔹 SPRING SECURITY (se necessário)
     // ========================================
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return Set.of(new SimpleGrantedAuthority(this.papel));
+    }
+
+    public void setRole(String s) {
     }
 }

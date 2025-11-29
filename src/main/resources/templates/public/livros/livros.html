@@ -3,10 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo de Livros - ReadCloud</title>
+    <title>Catálogo - ReadCloud</title>
+
+    <!-- Bootstrap + FontAwesome (mesmos do Home) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
     <style>
+        /* --- Paleta e variáveis idênticas ao Home --- */
         :root {
             --primary: #8B4513;
             --primary-dark: #654321;
@@ -25,326 +29,96 @@
             overflow-x: hidden;
         }
 
-        /* Animated Background */
+        /* Animated Background (copiado do Home) */
         .cloud-bg {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
             background: linear-gradient(135deg, #F5F5DC 0%, #F5F5F5 100%);
             overflow: hidden;
         }
+        .cloud { position:absolute; background:white; border-radius:50%; opacity:.7; animation:float 20s infinite linear; }
+        .cloud:nth-child(1){ width:200px;height:60px; top:10%; left:5%; animation-duration:25s; }
+        .cloud:nth-child(2){ width:300px;height:100px; top:25%; right:10%; animation-duration:30s; animation-delay:5s; }
+        .cloud:nth-child(3){ width:250px;height:80px; bottom:15%; left:15%; animation-duration:35s; animation-delay:10s; }
+        @keyframes float { 0%{transform:translateX(-100px)} 100%{transform:translateX(calc(100vw + 100px))} }
 
-        .cloud {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.7;
-            animation: float 20s infinite linear;
-        }
+        /* Navbar (igual ao Home) */
+        .navbar { background: rgba(255,255,255,0.95) !important; backdrop-filter: blur(10px); padding:1rem 0; box-shadow:0 2px 15px rgba(0,0,0,0.1); }
+        .navbar-brand { font-weight:700; font-size:1.8rem; background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
 
-        .cloud:nth-child(1) {
-            width: 200px;
-            height: 60px;
-            top: 10%;
-            left: 5%;
-            animation-duration: 25s;
-        }
-
-        .cloud:nth-child(2) {
-            width: 300px;
-            height: 100px;
-            top: 25%;
-            right: 10%;
-            animation-duration: 30s;
-            animation-delay: 5s;
-        }
-
-        .cloud:nth-child(3) {
-            width: 250px;
-            height: 80px;
-            bottom: 15%;
-            left: 15%;
-            animation-duration: 35s;
-            animation-delay: 10s;
-        }
-
-        @keyframes float {
-            0% { transform: translateX(-100px); }
-            100% { transform: translateX(calc(100vw + 100px)); }
-        }
-
-        /* Navbar */
-        .navbar {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            padding: 1rem 0;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-brand {
-            font-weight: 700;
-            font-size: 1.8rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .auth-container {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Botão Admin */
-        .btn-admin {
-            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 8px 16px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 3px 8px rgba(139, 69, 19, 0.2);
-        }
-
-        .btn-admin:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
-            background: linear-gradient(135deg, var(--accent) 0%, var(--primary) 100%);
-            color: white;
-        }
-
-        /* Page Header */
-        .page-header {
-            padding: 6rem 0 4rem;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
-            color: white;
-            margin-bottom: 2rem;
-        }
-
-        .page-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: cover;
-        }
-
-        .search-box {
-            max-width: 700px;
-            margin: 0 auto;
-            position: relative;
-        }
-
-        .search-box .input-group {
-            border-radius: 50px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(139, 69, 19, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .search-box .input-group:focus-within {
-            box-shadow: 0 15px 40px rgba(139, 69, 19, 0.3);
-            transform: translateY(-2px);
-        }
-
-        .search-box input {
-            border: none;
-            padding: 18px 25px;
-            font-size: 1.1rem;
-            background: white;
-        }
-
-        .search-box button {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            border: none;
-            padding: 0 30px;
-            color: white;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .search-box button:hover {
-            transform: scale(1.05);
-        }
-
-        /* Stats */
-        .stats {
-            padding: 4rem 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stats::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.1)"/></svg>');
-            background-size: cover;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 2rem;
-            text-align: center;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            z-index: 2;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            opacity: 0.9;
-        }
-
-        /* Filter Section */
-        .filter-section {
-            background: white;
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border: none;
-        }
-
-        .filter-group {
-            max-height: 200px;
-            overflow-y: auto;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            background: #f8f9fa;
-        }
-
-        .filter-group h6 {
-            color: #495057;
-            border-bottom: 2px solid var(--primary);
-            padding-bottom: 8px;
-            margin-bottom: 15px;
-        }
-
-        .filter-item {
-            margin-bottom: 8px;
-            padding: 5px 0;
-        }
-
-        .filter-item label {
-            cursor: pointer;
-            margin-bottom: 0;
-            font-size: 0.9rem;
-        }
-
-        .filter-item input[type="checkbox"] {
-            margin-right: 8px;
-        }
-
-        /* Book Cards */
-        .book-card {
-            border: none;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            background: white;
-            position: relative;
-        }
-
-        .book-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-
-        .book-cover {
-            height: 200px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .book-cover::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.1);
-        }
-
-        .book-badge {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            z-index: 2;
-        }
-
-        .book-stats {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 10px 0;
-        }
-
-        .book-actions {
-            border-top: 1px solid #eee;
-            padding: 1rem;
-            background: var(--light);
-        }
-
-        .btn-action {
-            border-radius: 8px;
-            padding: 8px 15px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            border: none;
-        }
+        .auth-container { display:flex; align-items:center; gap:10px; }
+        .auth-container .nav-link { padding:8px 16px; border-radius:6px; transition:all .3s; color:var(--primary); font-weight:500; }
+        .auth-container .nav-link:hover { background: rgba(139,69,19,0.1); color:var(--primary-dark); }
 
         .btn-primary {
             background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
+            border: none; color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139,69,19,0.4); }
+
+        .btn-outline-primary { border:1px solid var(--primary); color:var(--primary); }
+        .btn-outline-primary:hover { background-color: var(--primary); color:white; }
+
+        /* Botões específicos (padronizados conforme Home) */
+        .btn-admin {
+            background: linear-gradient(135deg, var(--warning) 0%, var(--accent) 100%); color:white; border:none; border-radius:8px; padding:8px 16px; font-weight:600; font-size:.9rem;
+            transition:all .3s; box-shadow:0 3px 8px rgba(139,69,19,0.2);
+        }
+        .btn-profile {
+            background: linear-gradient(135deg, var(--success) 0%, #6B8E23 100%); color:white; border:none; border-radius:8px; padding:8px 16px; font-weight:600;
+            transition:all .3s; box-shadow:0 3px 8px rgba(85,107,47,0.2);
+        }
+        .btn-cart {
+            background: linear-gradient(135deg, #D2691E 0%, #CD853F 100%); color:white; border:none; border-radius:8px; padding:8px 16px; font-weight:600; position:relative;
+            transition:all .3s; box-shadow:0 3px 8px rgba(210,105,30,0.2);
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.4);
+        /* Botões dentro do card */
+        .btn-alugar {
+            background: linear-gradient(135deg, var(--success) 0%, #6B8E23 100%);
+            color: white; border: none; border-radius: 8px; padding: 8px 12px; font-weight:600;
         }
+        .btn-alugar:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(85,107,47,0.18); }
 
-        /* Footer */
+        .btn-favorite {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+            color: white; border: none; border-radius: 8px; padding: 8px 12px; font-weight:600;
+        }
+        .btn-favorite:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(200,40,50,0.18); }
+
+        /* Card / grid styles (copiados do Home) */
+        .hero { padding:6rem 0 4rem; position:relative; overflow:hidden; }
+        .hero h1 { font-weight:800; background:linear-gradient(135deg,var(--secondary) 0%,var(--primary) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+        .search-box .input-group { border-radius:50px; overflow:hidden; box-shadow:0 10px 30px rgba(139,69,19,0.2); }
+        .book-card { border:none; border-radius:15px; overflow:hidden; box-shadow:0 5px 15px rgba(0,0,0,0.08); transition:all .3s; background:white; height:100%; display:flex; flex-direction:column; }
+        .book-card:hover { transform: translateY(-10px); box-shadow:0 15px 30px rgba(0,0,0,0.15); }
+        .book-cover { height:200px; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; background:linear-gradient(135deg,var(--primary) 0%, var(--accent) 100%); }
+        .book-cover img { width:100%; height:100%; object-fit:cover; transition:transform .3s; }
+        .book-card:hover .book-cover img { transform:scale(1.05); }
+        .book-cover::after { content:''; position:absolute; inset:0; background:rgba(0,0,0,0.1); }
+        .book-badge { position:absolute; top:10px; left:10px; z-index:2; }
+
+        .card-body { padding:1rem; flex: 1 1 auto; }
+        .book-actions { border-top:1px solid #eee; padding:1rem; background:var(--light); }
+
+        /* layout B: primeiro linha com 2 botões (50%/50%), abaixo botão favorito 100% */
+        .card-action-row { display:flex; gap:8px; }
+        .card-action-row .w-50 { flex:1 1 0; }
+
+        /* toast container */
+        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 1050; max-width: 360px; }
+
+        /* responsive tweaks */
+        @media (max-width: 768px) {
+            .hero { padding:4rem 0 3rem; }
+            .card-action-row { flex-direction: column; }
+        }
         footer {
             background: var(--secondary);
             color: white;
             padding: 3rem 0 1rem;
-            margin-top: 3rem;
         }
 
         .footer-links a {
@@ -357,377 +131,243 @@
             color: white;
         }
 
-        /* Floating Action Button */
-        .floating-action {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            z-index: 1000;
-        }
-
-        .floating-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            color: white;
-            border: none;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .floating-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-        }
-
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1050;
-        }
-
-        .custom-toast {
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            border: none;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .page-header {
-                padding: 4rem 0 3rem;
-            }
-
-            .search-box input {
-                padding: 15px 20px;
-            }
-
-            .stat-card {
-                margin-bottom: 1.5rem;
-            }
-
-            .filter-group {
-                margin-bottom: 1rem;
-            }
-
-            .auth-container {
-                flex-direction: column;
-                width: 100%;
-                margin-top: 1rem;
-                gap: 8px;
-            }
-
-            .auth-container .nav-link,
-            .auth-container .btn {
-                width: 100%;
-                text-align: center;
-                justify-content: center;
-            }
-        }
     </style>
 </head>
 <body>
 
-<!-- Animated Background -->
-<div class="cloud-bg">
+<!-- Animated background -->
+<div class="cloud-bg" aria-hidden="true">
     <div class="cloud"></div>
     <div class="cloud"></div>
     <div class="cloud"></div>
 </div>
 
-<!-- Navbar Corrigido -->
-<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+<!-- Navbar (igual ao Home) -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top" aria-label="Main navigation">
     <div class="container">
-        <a class="navbar-brand" th:href="@{/templates/public}">
-            <i class="fas fa-cloud me-2"></i>ReadCloud
-        </a>
+        <a class="navbar-brand" th:href="@{/}"><i class="fas fa-cloud me-2"></i> ReadCloud</a>
 
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Alternar navegação">
             <span class="navbar-toggler-icon"></span>
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/templates/public}">Início</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" th:href="@{/livros}">Explorar Livros</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/sobre}">Sobre</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" th:href="@{/contato}">Contato</a>
-                </li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/}">Início</a></li>
+                <li class="nav-item"><a class="nav-link active" th:href="@{/livros}">Explorar Livros</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/sobre}">Sobre</a></li>
+                <li class="nav-item"><a class="nav-link" th:href="@{/contato}">Contato</a></li>
             </ul>
 
             <div class="auth-container">
-                <!-- Usuário autenticado -->
-                <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-2">
-
-                    <!-- Botão ADMIN - VISÍVEL APENAS PARA ADMIN -->
-                    <div sec:authorize="hasRole('ADMIN')">
-                        <a th:href="@{/admin/painel}" class="btn btn-admin btn-sm me-2">
-                            <i class="fas fa-tools me-1"></i> Painel Admin
-                        </a>
-                    </div>
-
-                    <span class="navbar-text me-2" sec:authentication="name">Olá, <span sec:authentication="name">Usuário</span></span>
+                <!-- ADMIN -->
+                <div sec:authorize="hasRole('ADMIN')" class="d-flex gap-2 align-items-center">
+                    <a th:href="@{/admin/painel}" class="btn btn-admin btn-sm"><i class="fas fa-tools me-1"></i> Painel Admin</a>
                     <form th:action="@{/logout}" method="post" class="d-inline">
                         <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                        <button type="submit" class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-sign-out-alt me-1"></i> Sair
-                        </button>
+                        <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fas fa-sign-out-alt me-1"></i> Sair</button>
                     </form>
                 </div>
 
-                <!-- Usuário não autenticado -->
-                <div sec:authorize="!isAuthenticated()" class="d-flex align-items-center gap-2">
-                    <a class="nav-link" th:href="@{/login}">
-                        <i class="fas fa-sign-in-alt me-1"></i> Entrar
+                <!-- USUÁRIO COMUM -->
+                <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')" class="d-flex gap-2 align-items-center">
+                    <a th:href="@{/perfil}" class="btn btn-profile btn-sm"><i class="fas fa-user me-1"></i> Meu Perfil</a>
+                    <a th:href="@{/carrinho}" class="btn btn-cart btn-sm position-relative">
+                        <i class="fas fa-shopping-cart me-1"></i> Carrinho
+                        <span th:if="${carrinhoCount > 0}" class="cart-badge" th:text="${carrinhoCount}">0</span>
                     </a>
-                    <a class="btn btn-primary" th:href="@{/registro}">
-                        <i class="fas fa-user-plus me-1"></i> Cadastrar
-                    </a>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fas fa-sign-out-alt me-1"></i> Sair</button>
+                    </form>
+                </div>
+
+                <!-- NÃO AUTENTICADO -->
+                <div sec:authorize="!isAuthenticated()" class="d-flex gap-2 align-items-center">
+                    <a th:href="@{/login}" class="nav-link"><i class="fas fa-sign-in-alt me-1"></i> Entrar</a>
+                    <a th:href="@{/cadastro}" class="btn btn-primary btn-sm"><i class="fas fa-user-plus me-1"></i> Cadastrar</a>
                 </div>
             </div>
         </div>
     </div>
 </nav>
 
-<!-- Page Header -->
-<section class="page-header">
-    <div class="container text-center">
-        <h1 class="display-5 fw-bold mb-3">Catálogo Completo de Livros</h1>
-        <p class="lead mb-4">Explore todos os livros disponíveis em nossa biblioteca</p>
+<!-- Hero (similar ao Home, título adequado) -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12 hero-content text-center">
+                <h1 class="display-4 fw-bold">Catálogo — Explore nossos Livros</h1>
+                <p class="lead">Encontre títulos, autores e categorias no acervo ReadCloud.</p>
 
-        <div class="search-box">
-            <form th:action="@{/livros}" method="get" class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Buscar livros, autores ou categorias..." th:value="${param.search}">
-                <button class="btn" type="submit">
-                    <i class="fas fa-search me-1"></i> Buscar
-                </button>
-            </form>
+                <div class="search-box mt-3 mx-auto" style="max-width:720px;">
+                    <form th:action="@{/livros}" method="get" class="input-group">
+                        <input type="text" name="pesquisa" class="form-control" placeholder="Buscar livros, autores, categorias..." th:value="${param.pesquisa}">
+                        <button class="btn btn-primary" type="submit"><i class="fas fa-search me-1"></i> Buscar</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<!-- Stats -->
+<!-- Main catalog -->
+<section class="popular-section">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <span class="section-badge">Catálogo</span>
+            <h2 class="fw-bold">Todos os Livros</h2>
+            <p class="text-muted">Filtre e escolha o próximo livro a alugar.</p>
+        </div>
+
+        <div th:if="${sucesso}" class="alert alert-success" th:text="${sucesso}"></div>
+        <div th:if="${erro}" class="alert alert-danger" th:text="${erro}"></div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3" th:each="livro : ${livros}">
+                <article class="book-card" role="article" aria-labelledby="livro-title-[[${livro.id}]]">
+                    <!-- cover -->
+                    <div class="book-cover">
+                        <span class="book-badge badge" th:classappend="${livro.quantidade > 0} ? ' bg-success' : ' bg-danger'"
+                              th:text="${livro.quantidade > 0} ? 'Disponível' : 'Indisponível'"></span>
+
+                        <img th:if="${livro.imagemCapa != null && !livro.imagemCapa.isEmpty()}"
+                             th:src="@{'/uploads/' + ${livro.imagemCapa}}"
+                             th:alt="${livro.titulo}"
+                             onerror="this.onerror=null; this.style.display='none';">
+                        <i class="fas fa-book fa-3x" th:if="${livro.imagemCapa == null || livro.imagemCapa.isEmpty()}" style="display:flex;"></i>
+                    </div>
+
+                    <!-- info -->
+                    <div class="card-body">
+                        <h5 id="livro-title-[[${livro.id}]]" class="card-title" th:text="${livro.titulo}">Título do Livro</h5>
+                        <p class="card-text text-muted mb-1" th:text="${livro.autor}">Autor</p>
+                        <p class="text-muted small mb-2" th:text="${livro.categoria != null ? livro.categoria.nome : 'Sem categoria'}">Categoria</p>
+
+                        <div class="book-stats d-flex justify-content-between align-items-center">
+                            <small class="text-muted" th:text="'Qtd: ' + ${livro.quantidade}">Qtd: 0</small>
+                            <div class="book-rating">
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="fas fa-star text-warning"></i>
+                                <i class="far fa-star text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- actions (layout B):
+                         first row: two buttons side-by-side (Ver Detalhes, Alugar)
+                         second row: Favoritar full width
+                    -->
+                    <div class="book-actions">
+
+                        <!-- SE FOR ADMIN → apenas “Ver Detalhes” -->
+                        <div sec:authorize="hasRole('ADMIN')">
+                            <a th:href="@{/livros/detalhes/{id}(id=${livro.id})}"
+                               class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-eye me-1"></i> Ver Detalhes
+                            </a>
+                        </div>
+
+                        <!-- SE NÃO FOR ADMIN → botões normais -->
+                        <div sec:authorize="!hasRole('ADMIN')">
+
+                            <!-- linha: detalhes + alugar -->
+                            <div class="card-action-row mb-2">
+                                <div class="w-50">
+                                    <a th:href="@{/livros/detalhes/{id}(id=${livro.id})}"
+                                       class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="fas fa-eye me-1"></i> Ver Detalhes
+                                    </a>
+                                </div>
+
+                                <div class="w-50">
+                                    <!-- Alugar -->
+                                    <form th:action="@{/carrinho/adicionar/{id}(id=${livro.id})}"
+                                          method="post" th:if="${livro.quantidade > 0}" class="h-100 d-grid">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="btn btn-alugar btn-sm w-100">
+                                            <i class="fas fa-hand-holding me-1"></i> Alugar
+                                        </button>
+                                    </form>
+
+                                    <button th:if="${livro.quantidade <= 0}"
+                                            type="button" class="btn btn-outline-secondary btn-sm w-100" disabled>
+                                        <i class="fas fa-ban me-1"></i> Indisponível
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Favoritar -->
+                            <form th:action="@{/livros/desejar/{id}(id=${livro.id})}"
+                                  method="post"
+                                  th:if="${#authentication != null && #authentication.authenticated}">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                <button type="submit" class="btn btn-favorite btn-sm w-100">
+                                    <i class="fas fa-heart me-1"></i> Favoritar
+                                </button>
+                            </form>
+
+                            <!-- Visitante → login obrigatório -->
+                            <div sec:authorize="!isAuthenticated()" class="d-flex gap-2">
+                                <a th:href="@{/login}" class="btn btn-alugar btn-sm w-50">
+                                    <i class="fas fa-hand-holding me-1"></i> Alugar
+                                </a>
+                                <a th:href="@{/login}" class="btn btn-outline-danger btn-sm w-50">
+                                    <i class="fas fa-heart me-1"></i> Favoritar
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <div class="col-12" th:if="${livros == null or #lists.isEmpty(livros)}">
+                <div class="alert alert-info text-center">Nenhum livro encontrado.</div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a th:href="@{/livros}" class="btn btn-primary"><i class="fas fa-book me-1"></i> Ver Todos os Livros</a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats (copiado do Home) -->
 <section class="stats">
     <div class="container">
         <div class="row g-4">
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-book"></i>
-                    </div>
-                    <h3 class="fw-bold" th:text="${totalLivros != null ? totalLivros : 0}">1,247</h3>
-                    <p class="mb-0">Total de Livros</p>
+            <div class="col-md-4">
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-book"></i></div>
+                    <h3 class="fw-bold" th:text="${totalLivros != null ? totalLivros : 0}">0</h3>
+                    <p class="mb-0">Livros no Acervo</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-check-circle"></i>
-                    </div>
-                    <h3 class="fw-bold" th:text="${livrosDisponiveis != null ? livrosDisponiveis : 0}">856</h3>
+            <div class="col-md-4">
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+                    <h3 class="fw-bold" th:text="${livrosDisponiveis != null ? livrosDisponiveis : 0}">0</h3>
                     <p class="mb-0">Disponíveis</p>
                 </div>
             </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-exchange-alt"></i>
-                    </div>
-                    <h3 class="fw-bold" th:text="${livrosEmprestados != null ? livrosEmprestados : 0}">89</h3>
-                    <p class="mb-0">Emprestados</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-tags"></i>
-                    </div>
-                    <h3 class="fw-bold" th:text="${categorias != null ? categorias.size() : 0}">24</h3>
-                    <p class="mb-0">Categorias</p>
+            <div class="col-md-4">
+                <div class="stat-card"><div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <h3 class="fw-bold" th:text="${livrosEmprestados != null ? livrosEmprestados : 0}">0</h3>
+                    <p class="mb-0">Empréstimos Ativos</p>
                 </div>
             </div>
         </div>
     </div>
 </section>
-
-<!-- Main Content -->
-<div class="container">
-    <!-- Mensagens de sucesso/erro -->
-    <div th:if="${sucesso}" class="alert alert-success alert-dismissible fade show" role="alert">
-        <span th:text="${sucesso}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    <div th:if="${erro}" class="alert alert-danger alert-dismissible fade show" role="alert">
-        <span th:text="${erro}"></span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-
-    <div class="row">
-        <!-- Filters Sidebar -->
-        <div class="col-lg-3 mb-4">
-            <div class="filter-section">
-                <h5 class="fw-bold mb-3">Filtros</h5>
-
-                <div class="mb-4">
-                    <h6>Categorias</h6>
-                    <div class="filter-group">
-                        <!-- Categorias dinâmicas do banco de dados -->
-                        <div th:each="categoria : ${categorias}" class="filter-item">
-                            <input type="checkbox" th:id="'cat-' + ${categoria.id}" class="form-check-input categoria-filter" th:value="${categoria.id}">
-                            <label th:for="'cat-' + ${categoria.id}" class="form-check-label" th:text="${categoria.nome}">Categoria</label>
-                        </div>
-                        <!-- Fallback se não houver categorias -->
-                        <div th:if="${categorias == null || categorias.isEmpty()}" class="filter-item">
-                            <small class="text-muted">Nenhuma categoria disponível</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <h6>Disponibilidade</h6>
-                    <div class="filter-group">
-                        <div class="filter-item">
-                            <input type="checkbox" id="disp-disponivel" class="form-check-input disponibilidade-filter" value="disponivel" checked>
-                            <label for="disp-disponivel" class="form-check-label">Disponível</label>
-                        </div>
-                        <div class="filter-item">
-                            <input type="checkbox" id="disp-indisponivel" class="form-check-input disponibilidade-filter" value="indisponivel">
-                            <label for="disp-indisponivel" class="form-check-label">Indisponível</label>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="d-grid">
-                    <button class="btn btn-primary" onclick="aplicarFiltros()">Aplicar Filtros</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Books Grid -->
-        <div class="col-lg-9">
-            <div class="row">
-                <!-- Livros dinâmicos do banco de dados -->
-                <div class="col-md-6 col-lg-4 mb-4" th:each="livro : ${livros}">
-                    <div class="book-card">
-                        <div class="book-cover">
-                            <span class="book-badge badge" th:classappend="${livro.quantidade > 0} ? ' bg-success' : ' bg-danger'"
-                                  th:text="${livro.quantidade > 0} ? 'Disponível' : 'Indisponível'"></span>
-                            <i class="fas fa-book fa-3x"></i>
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title" th:text="${livro.titulo}">Título do Livro</h5>
-                            <p class="card-text text-muted" th:text="${livro.autor}">Autor</p>
-                            <p class="card-text text-muted small" th:text="${livro.editora}">Editora</p>
-                            <div class="book-stats">
-                                <div>
-                                    <small class="text-muted d-block" th:text="'Qtd: ' + ${livro.quantidade}">Qtd: 5</small>
-                                </div>
-                                <div class="text-end">
-                                    <small class="text-muted" th:text="${livro.categoria != null ? livro.categoria.nome : 'Sem categoria'}">Categoria</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="book-actions">
-                            <div class="d-grid gap-2">
-                                <!-- Ver Detalhes - SEMPRE disponível -->
-                                <a th:href="@{/livros/detalhes/{id}(id=${livro.id})}" class="btn btn-outline-primary btn-sm">
-                                    <i class="fas fa-eye me-1"></i> Ver Detalhes
-                                </a>
-
-                                <div class="d-flex gap-2">
-                                    <!-- Alugar (apenas se quantidade > 0) -->
-                                    <div th:if="${livro.quantidade > 0}" class="w-50">
-                                        <!-- Usuário autenticado: mostra formulário normal -->
-                                        <form th:action="@{/livros/alugar/{id}(id=${livro.id})}" method="post" sec:authorize="isAuthenticated()" class="h-100">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                            <button type="submit" class="btn btn-success btn-sm w-100 h-100">
-                                                <i class="fas fa-hand-holding me-1"></i> Alugar
-                                            </button>
-                                        </form>
-                                        <!-- Usuário NÃO autenticado: redireciona para login -->
-                                        <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="btn btn-success btn-sm w-100 h-100 d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-hand-holding me-1"></i> Alugar
-                                        </a>
-                                    </div>
-
-                                    <!-- Botão indisponível -->
-                                    <button th:if="${livro.quantidade <= 0}" class="btn btn-outline-secondary btn-sm w-50" disabled>
-                                        <i class="fas fa-ban me-1"></i> Indisponível
-                                    </button>
-
-                                    <!-- Favoritar / Desejar -->
-                                    <div class="w-50">
-                                        <!-- Usuário autenticado: mostra formulário normal -->
-                                        <form th:action="@{/livros/desejar/{id}(id=${livro.id})}" method="post" sec:authorize="isAuthenticated()" class="h-100">
-                                            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100 h-100">
-                                                <i class="fas fa-heart me-1"></i> Favoritar
-                                            </button>
-                                        </form>
-                                        <!-- Usuário NÃO autenticado: redireciona para login -->
-                                        <a th:href="@{/login}" sec:authorize="!isAuthenticated()" class="btn btn-outline-danger btn-sm w-100 h-100 d-flex align-items-center justify-content-center">
-                                            <i class="fas fa-heart me-1"></i> Favoritar
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Fallback quando não houver livros -->
-                <div class="col-12" th:if="${livros == null || livros.isEmpty()}">
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-book-open fa-2x mb-3"></i>
-                        <h5>Nenhum livro encontrado</h5>
-                        <p class="mb-0">Tente ajustar os filtros ou realizar uma nova busca.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Paginação -->
-            <nav aria-label="Navegação de páginas" class="mt-5" th:if="${totalPaginas > 1}">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item" th:classappend="${paginaAtual == 1} ? 'disabled' : ''">
-                        <a class="page-link" th:href="@{/livros(page=${paginaAtual - 1}, search=${param.search})}" tabindex="-1" aria-disabled="true">Anterior</a>
-                    </li>
-
-                    <li th:each="i : ${#numbers.sequence(1, totalPaginas)}" class="page-item" th:classappend="${i == paginaAtual} ? 'active' : ''">
-                        <a class="page-link" th:href="@{/livros(page=${i}, search=${param.search})}" th:text="${i}">1</a>
-                    </li>
-
-                    <li class="page-item" th:classappend="${paginaAtual == totalPaginas} ? 'disabled' : ''">
-                        <a class="page-link" th:href="@{/livros(page=${paginaAtual + 1}, search=${param.search})}">Próxima</a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
-    </div>
-</div>
 
 <!-- Footer -->
 <footer>
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-6 mb-4 mb-md-0">
-                <h4 class="fw-bold">
-                    <i class="fas fa-cloud me-2"></i> ReadCloud
-                </h4>
+                <h4 class="fw-bold"><i class="fas fa-cloud me-2"></i> ReadCloud</h4>
                 <p class="mb-0">Sua biblioteca digital na nuvem</p>
             </div>
             <div class="col-md-6 text-md-end text-center">
@@ -735,104 +375,100 @@
                     <a th:href="@{/sobre}" class="me-3">Sobre</a>
                     <a th:href="@{/contato}" class="me-3">Contato</a>
                     <a th:href="@{/livros}" class="me-3">Livros</a>
-                    <a href="#">Ajuda</a>
                 </div>
             </div>
         </div>
+
         <hr class="my-4" style="border-color: rgba(255,255,255,0.2);">
+
         <div class="text-center">
-            <p class="mb-0 small">&copy; 2024 ReadCloud. Todos os direitos reservados.</p>
+            <p class="mb-0 small">&copy; 2025 ReadCloud. Todos os direitos reservados.</p>
         </div>
     </div>
 </footer>
 
-<!-- Floating Action Button -->
-<div class="floating-action">
-    <button class="floating-btn" data-bs-toggle="tooltip" data-bs-placement="left" title="Precisa de ajuda?">
-        <i class="fas fa-question"></i>
-    </button>
-</div>
 
-<!-- Toast Container -->
-<div class="toast-container">
-    <!-- Toasts will be dynamically added here -->
-</div>
+<!-- Toast -->
+<div class="toast-container" aria-live="polite" aria-atomic="true"></div>
 
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Initialize tooltips
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    // Tooltips (como Home)
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-
-    // Add scroll effect to navbar
-    window.addEventListener('scroll', function() {
-        const navbar = document.querySelector('.navbar');
-        if (window.scrollY > 50) {
-            navbar.style.padding = '0.5rem 0';
-            navbar.style.boxShadow = '0 5px 20px rgba(0,0,0,0.1)';
-        } else {
-            navbar.style.padding = '1rem 0';
-            navbar.style.boxShadow = '0 2px 15px rgba(0,0,0,0.1)';
-        }
+        return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
-    // Função para aplicar filtros
-    function aplicarFiltros() {
-        const categoriasSelecionadas = Array.from(document.querySelectorAll('.categoria-filter:checked'))
-            .map(checkbox => checkbox.value);
-
-        const disponibilidade = Array.from(document.querySelectorAll('.disponibilidade-filter:checked'))
-            .map(checkbox => checkbox.value);
-
-        // Em uma aplicação real, isso enviaria os filtros para o backend
-        // Por enquanto, apenas mostra um alerta
-        alert('Filtros aplicados!\nCategorias: ' + categoriasSelecionadas.join(', ') +
-            '\nDisponibilidade: ' + disponibilidade.join(', '));
-
-        // Em produção, você faria algo como:
-        // window.location.href = '/livros?categorias=' + categoriasSelecionadas.join(',') + '&disponibilidade=' + disponibilidade.join(',');
-    }
-
-    // Auto-dismiss alerts after 5 seconds
     document.addEventListener('DOMContentLoaded', function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(alert => {
+        // Auto-dismiss alerts
+        document.querySelectorAll('.alert').forEach(alert => {
             setTimeout(() => {
-                if (alert.classList.contains('show')) {
-                    const bsAlert = new bootstrap.Alert(alert);
-                    bsAlert.close();
-                }
+                try { new bootstrap.Alert(alert).close(); } catch(e){}
             }, 5000);
         });
+
+        // Save redirect when clicking login links (guests)
+        document.querySelectorAll('a.guest-action, a[href$="/login"]').forEach(link => {
+            link.addEventListener('click', function() {
+                try { sessionStorage.setItem('redirectAfterLogin', window.location.href); } catch(e){}
+            });
+        });
+
+        // FAVORITOS (POST com CSRF) -> feedback visual antes do submit
+        document.querySelectorAll('form[th\\:action][method="post"]').forEach(form => {
+            // only attach to favorito forms by checking contained button class
+            const btn = form.querySelector('button.btn-favorite, button.btn-favorite.btn-sm');
+            if (!btn) return;
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-heart me-1"></i> Favoritado';
+                btn.classList.remove('btn-favorite');
+                btn.classList.add('btn-outline-danger');
+                showToast('Livro adicionado aos favoritos! ❤️', 'success', 1400);
+                setTimeout(() => { try { form.submit(); } catch(err) { console.error(err); } }, 700);
+            });
+        });
+
+        // Alugar forms: give user visual feedback but submit normally
+        document.querySelectorAll('form[th\\:action][method="post"]').forEach(form => {
+            const btnAlugar = form.querySelector('button.btn-alugar');
+            if (!btnAlugar) return;
+            form.addEventListener('submit', function(e) {
+                // Visual feedback, then normal submit
+                btnAlugar.disabled = true;
+                const original = btnAlugar.innerHTML;
+                btnAlugar.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i> Processando...';
+                showToast('Adicionando ao carrinho...', 'success', 1800);
+                // allow submit to continue (no preventDefault)
+                // If you previously prevented submit elsewhere, ensure not to prevent here.
+            });
+        });
     });
 
-    function showToast(message, type) {
-        const toastContainer = document.querySelector('.toast-container');
-        const toastId = 'toast-' + Date.now();
+    // Toast helper
+    function showToast(message, type='success', timeout=3000) {
+        const container = document.querySelector('.toast-container');
+        const id = 'toast-' + Date.now();
+        const bgClass = (type === 'danger' || type === 'error') ? 'bg-danger text-white' :
+            (type === 'warning' ? 'bg-warning text-dark' : 'bg-success text-white');
 
         const toastHTML = `
-            <div id="${toastId}" class="toast custom-toast align-items-center text-white bg-${type} border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div id="${id}" class="toast ${bgClass} align-items-center border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="${timeout}">
                 <div class="d-flex">
-                    <div class="toast-body">
-                        ${message}
-                    </div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Fechar"></button>
                 </div>
-            </div>
-        `;
-
-        toastContainer.insertAdjacentHTML('beforeend', toastHTML);
-
-        const toastElement = document.getElementById(toastId);
-        const toast = new bootstrap.Toast(toastElement);
-        toast.show();
-
-        toastElement.addEventListener('hidden.bs.toast', function() {
-            toastElement.remove();
-        });
+            </div>`;
+        container.insertAdjacentHTML('beforeend', toastHTML);
+        const el = document.getElementById(id);
+        const bsToast = new bootstrap.Toast(el);
+        bsToast.show();
+        el.addEventListener('hidden.bs.toast', () => el.remove());
+        return el;
     }
 </script>
+
 </body>
 </html>

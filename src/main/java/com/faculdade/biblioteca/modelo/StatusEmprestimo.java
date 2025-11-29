@@ -1,4 +1,8 @@
 package com.faculdade.biblioteca.modelo;
 
-public class StatusEmprestimo {
+public enum StatusEmprestimo {
+    ATIVO,
+    ATRASADO,
+    FINALIZADO,
+    RENOVADO
 }
