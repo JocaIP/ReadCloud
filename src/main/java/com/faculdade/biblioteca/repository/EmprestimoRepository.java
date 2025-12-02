@@ -1,9 +1,14 @@
 package com.faculdade.biblioteca.repository;
 
+import com.faculdade.biblioteca.dto.GraficoLivroDTO;
+import com.faculdade.biblioteca.dto.GraficoEstadoDTO;
+import com.faculdade.biblioteca.dto.GraficoUsuarioDTO;
+import com.faculdade.biblioteca.dto.GraficoBaixaSaidaDTO;
 import com.faculdade.biblioteca.modelo.Emprestimo;
 import com.faculdade.biblioteca.modelo.Livro;
 import com.faculdade.biblioteca.modelo.Usuario;
 import com.faculdade.biblioteca.modelo.StatusEmprestimo;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -93,6 +98,72 @@ public interface EmprestimoRepository extends JpaRepository<Emprestimo, Long> {
     List<Emprestimo> buscarPorTermo(@Param("termo") String termo);
 
     List<Emprestimo> findByUsuarioIdAndStatus(Long usuarioId, StatusEmprestimo status);
+
     Optional<Emprestimo> findTopByUsuarioIdOrderByDataEmprestimoDesc(Long usuarioId);
 
+    // ✅ TOP 10 LIVROS
+    @Query("""
+        SELECT new com.faculdade.biblioteca.dto.GraficoLivroDTO(l.titulo, COUNT(e))
+        FROM Emprestimo e JOIN e.livro l
+        GROUP BY l.titulo
+        ORDER BY COUNT(e) DESC
+    """)
+    List<GraficoLivroDTO> buscarTop10LivrosMaisAlugados(Pageable pageable);
+
+    // ✅ TOP 10 ESTADOS
+    @Query("""
+        SELECT new com.faculdade.biblioteca.dto.GraficoEstadoDTO(u.estado, COUNT(e))
+        FROM Emprestimo e JOIN e.usuario u
+        GROUP BY u.estado
+        ORDER BY COUNT(e) DESC
+    """)
+    List<GraficoEstadoDTO> buscarTop10Estados(Pageable pageable);
+
+    // ✅ TOP 5 USUÁRIOS QUE MAIS ALUGAM
+    @Query("""
+        SELECT new com.faculdade.biblioteca.dto.GraficoUsuarioDTO(u.nome, COUNT(e))
+        FROM Emprestimo e JOIN e.usuario u
+        GROUP BY u.nome, u.id
+        ORDER BY COUNT(e) DESC
+    """)
+    List<GraficoUsuarioDTO> buscarTop5Usuarios(Pageable pageable);
+
+    // ✅ LIVROS NUNCA ALUGADOS
+    @Query("""
+        SELECT l FROM Livro l
+        WHERE l.id NOT IN (
+            SELECT DISTINCT e.livro.id FROM Emprestimo e
+        )
+        ORDER BY l.titulo
+    """)
+    List<Livro> buscarLivrosNuncaAlugados();
+
+    // ✅ EMPRÉSTIMOS POR MÊS (últimos 6 meses)
+    @Query(value = """
+        SELECT 
+            DATE_FORMAT(e.data_emprestimo, '%Y-%m') as mes,
+            COUNT(*) as total
+        FROM emprestimos e
+        WHERE e.data_emprestimo >= DATE_SUB(NOW(), INTERVAL 6 MONTH)
+        GROUP BY DATE_FORMAT(e.data_emprestimo, '%Y-%m')
+        ORDER BY mes
+    """, nativeQuery = true)
+    List<Object[]> buscarEmprestimosPorMes();
+
+    // ✅ LIVROS COM BAIXA SAÍDA (menos de 3 empréstimos nos últimos 6 meses)
+    @Query("""
+        SELECT new com.faculdade.biblioteca.dto.GraficoBaixaSaidaDTO(
+            l.titulo, 
+            (SELECT COUNT(e) FROM Emprestimo e WHERE e.livro = l AND e.dataEmprestimo >= :dataLimite)
+        )
+        FROM Livro l
+        WHERE (
+            SELECT COUNT(e) 
+            FROM Emprestimo e 
+            WHERE e.livro = l 
+            AND e.dataEmprestimo >= :dataLimite
+        ) < 3
+        ORDER BY l.titulo
+    """)
+    List<GraficoBaixaSaidaDTO> buscarLivrosComBaixaSaida(@Param("dataLimite") LocalDateTime dataLimite);
 }

@@ -596,7 +596,7 @@
 
                 <!-- USUÁRIO COMUM -->
                 <div sec:authorize="isAuthenticated() and !hasRole('ADMIN')" class="d-flex align-items-center gap-2">
-                    <a th:href="@{/perfil/dashboard}" class="btn btn-profile btn-sm me-2">
+                    <a th:href="@{/perfil}" class="btn btn-profile btn-sm me-2">
                         <i class="fas fa-user me-1"></i> Meu Perfil
                     </a>
                     <a th:href="@{/carrinho}" class="btn btn-cart btn-sm me-2 position-relative">

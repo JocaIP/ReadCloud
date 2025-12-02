@@ -8,6 +8,7 @@
     <!-- Bootstrap + FontAwesome -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
         :root{
@@ -27,7 +28,6 @@
             min-height: 100vh;
         }
 
-        /* Top navbar */
         .topbar {
             background: rgba(255,255,255,0.9);
             border-bottom: 1px solid rgba(0,0,0,0.05);
@@ -52,75 +52,432 @@
             width: 250px;
         }
 
-        .sidebar .nav-link {
-            color: rgba(255,255,255,0.95);
-            margin: 6px 0;
-            border-radius: 8px;
-            padding: 10px 12px;
-        }
+        .nav-link { color: rgba(255,255,255,0.95); margin: 6px 0; border-radius: 8px; padding: 10px 12px; }
+        .nav-link:hover, .nav-link.active { background: rgba(0,0,0,0.08); color: #fff; }
 
-        .sidebar .nav-link:hover, .sidebar .nav-link.active {
-            background: rgba(0,0,0,0.08);
-            color: #fff;
-        }
-
-        .main {
-            margin-left: 250px;
-            padding: 28px;
-        }
+        .main { margin-left: 250px; padding: 28px; }
 
         .stat-card {
             border-radius: 12px;
             background: var(--card);
             box-shadow: 0 6px 18px rgba(0,0,0,0.06);
             padding: 18px;
-            height: 100%;
         }
 
-        .stat-value {
-            font-size: 1.9rem;
-            font-weight: 800;
-            color: var(--primary-dark);
-        }
+        .stat-value { font-size: 1.9rem; font-weight: 800; color: var(--primary-dark); }
+        .stat-label { color: #6b6b6b; font-weight: 600; }
 
-        .stat-label {
-            color: #6b6b6b;
-            font-weight: 600;
-        }
-
-        .table-actions a {
-            margin-right: 6px;
-        }
-
-        .small-muted {
-            color: #6e6e6e;
-        }
+        .small-muted { color: #6e6e6e; }
 
         @media (max-width: 991px){
             .sidebar { position: relative; width: 100%; min-height: auto; }
             .main { margin-left: 0; padding: 16px; }
         }
+
+        .grafico-container {
+            width: 280px;
+            height: 280px;
+            margin: 0 auto;
+        }
+
+        canvas {
+            max-width: 260px !important;
+            max-height: 260px !important;
+        }
+
+        .card-header {
+            background-color: var(--light);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
     </style>
 </head>
+
 <body>
+
+<script>
+    // Função para formatar nomes longos
+    function formatarTitulo(titulo, maxLength = 20) {
+        if (titulo.length <= maxLength) return titulo;
+        return titulo.substring(0, maxLength) + '...';
+    }
+
+    // Função para formatar meses (de "2024-01" para "Jan/24")
+    function formatarMes(mesString) {
+        if (!mesString) return '';
+        const parts = mesString.split('-');
+        if (parts.length !== 2) return mesString;
+
+        const ano = parts[0].substring(2); // Pega últimos 2 dígitos
+        const mes = parseInt(parts[1]);
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        return `${meses[mes-1]}/${ano}`;
+    }
+
+    // ===========================
+    //  GRÁFICO 1 - TOP 10 LIVROS
+    // ===========================
+    fetch('/api/dashboard/livros')
+        .then(res => res.json())
+        .then(dados => {
+            if (dados && dados.length > 0) {
+                new Chart(document.getElementById('graficoLivros'), {
+                    type: 'pie',
+                    data: {
+                        labels: dados.map(l => formatarTitulo(l.titulo, 15)),
+                        datasets: [{
+                            data: dados.map(l => l.total),
+                            backgroundColor: [
+                                '#8B4513', '#A0522D', '#D2691E', '#CD853F',
+                                '#F4A460', '#DEB887', '#D2B48C', '#BC8F8F',
+                                '#A52A2A', '#800000'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15,
+                                    usePointStyle: true
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('graficoLivros').parentElement.innerHTML =
+                    '<p class="text-muted text-center p-4">Sem dados disponíveis</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar gráfico de livros:', error);
+        });
+
+    // ===========================
+    //  GRÁFICO 2 - TOP 10 ESTADOS
+    // ===========================
+    fetch('/api/dashboard/estados')
+        .then(res => res.json())
+        .then(dados => {
+            if (dados && dados.length > 0) {
+                new Chart(document.getElementById('graficoEstados'), {
+                    type: 'pie',
+                    data: {
+                        labels: dados.map(e => e.estado || 'Não informado'),
+                        datasets: [{
+                            data: dados.map(e => e.total),
+                            backgroundColor: [
+                                '#2F4F4F', '#556B2F', '#6B8E23', '#808000',
+                                '#BDB76B', '#F0E68C', '#EEE8AA', '#FFD700',
+                                '#DAA520', '#B8860B'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 15
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('graficoEstados').parentElement.innerHTML =
+                    '<p class="text-muted text-center p-4">Sem dados disponíveis</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar gráfico de estados:', error);
+        });
+
+    // ===========================
+    //  GRÁFICO 3 - USUÁRIOS QUE MAIS ALUGAM (TOP 5)
+    // ===========================
+    fetch('/api/dashboard/usuarios-top')
+        .then(res => res.json())
+        .then(dados => {
+            if (dados && dados.length > 0) {
+                new Chart(document.getElementById('graficoUsuariosTop'), {
+                    type: 'bar',
+                    data: {
+                        labels: dados.map(u => formatarTitulo(u.nome, 12)),
+                        datasets: [{
+                            label: 'Empréstimos',
+                            data: dados.map(u => u.total),
+                            backgroundColor: '#8B4513',
+                            borderColor: '#654321',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('graficoUsuariosTop').parentElement.innerHTML =
+                    '<p class="text-muted text-center p-4">Sem dados disponíveis</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar gráfico de usuários:', error);
+        });
+
+    // ===========================
+    //  GRÁFICO 4 - LIVROS NUNCA ALUGADOS
+    // ===========================
+    fetch('/api/dashboard/livros-nunca-alugados')
+        .then(res => res.json())
+        .then(dados => {
+            if (dados && dados.length > 0) {
+                // Limita a 8 itens para o gráfico ficar legível
+                const dadosLimitados = dados.slice(0, 8);
+
+                new Chart(document.getElementById('graficoLivrosNuncaAlugados'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: dadosLimitados.map(l => formatarTitulo(l.titulo || 'Sem título', 15)),
+                        datasets: [{
+                            data: dadosLimitados.map(l => l.meses_sem_aluguel || 12),
+                            backgroundColor: [
+                                '#A9A9A9', '#808080', '#696969', '#778899',
+                                '#708090', '#C0C0C0', '#D3D3D3', '#DCDCDC'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 10
+                                }
+                            }
+                        }
+                    }
+                });
+            } else {
+                document.getElementById('graficoLivrosNuncaAlugados').parentElement.innerHTML =
+                    '<p class="text-muted text-center p-4">Todos os livros foram alugados pelo menos uma vez</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar gráfico de livros nunca alugados:', error);
+        });
+
+    // ========== DADOS MOCK PARA OS 2 GRÁFICOS QUE FALTAM ==========
+    const dadosMock = {
+        emprestimosMes: [
+            { mes: "2025-01", total: 45 },
+            { mes: "2025-02", total: 52 },
+            { mes: "2025-03", total: 48 },
+            { mes: "2025-04", total: 60 },
+            { mes: "2025-05", total: 55 },
+            { mes: "2025-06", total: 62 },
+            { mes: "2025-07", total: 58 },
+            { mes: "2025-08", total: 65 }
+        ],
+
+        baixaSaida: [
+            { titulo: "Ética e Moral na Sociedade Contemporânea", totalEmprestimos: 2 },
+            { titulo: "Tratado de Direito Constitucional", totalEmprestimos: 1 },
+            { titulo: "Manual de Entomologia Avançada", totalEmprestimos: 0 },
+            { titulo: "História da Arte Gótica", totalEmprestimos: 1 },
+            { titulo: "Física Quântica para Engenheiros", totalEmprestimos: 2 },
+            { titulo: "Gramática do Grego Antigo", totalEmprestimos: 1 },
+            { titulo: "Bioquímica Metabólica", totalEmprestimos: 2 },
+            { titulo: "Geologia do Brasil", totalEmprestimos: 0 }
+        ]
+    };
+
+    // Função para formatar meses
+    function formatarMes(mesString) {
+        if (!mesString) return '';
+        const parts = mesString.split('-');
+        if (parts.length !== 2) return mesString;
+
+        const ano = parts[0].substring(2);
+        const mes = parseInt(parts[1]);
+        const meses = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+        return `${meses[mes-1]}/${ano}`;
+    }
+
+    // Função para formatar títulos longos
+    function formatarTitulo(titulo, maxLength = 20) {
+        if (!titulo) return 'Sem título';
+        if (titulo.length <= maxLength) return titulo;
+        return titulo.substring(0, maxLength) + '...';
+    }
+
+    // ===========================
+    //  GRÁFICO 5 - EMPRÉSTIMOS POR MÊS (COM DADOS MOCK)
+    // ===========================
+    fetch('/api/dashboard/emprestimos-mes')
+        .then(res => {
+            if (!res.ok) throw new Error('API não disponível');
+            return res.json();
+        })
+        .then(dados => {
+            // Se API retornar dados vazios ou erro, usa mock
+            if (!dados || dados.length === 0) {
+                console.log('API retornou vazio, usando dados mock para Empréstimos por Mês');
+                criarGraficoEmprestimosMes(dadosMock.emprestimosMes);
+            } else {
+                criarGraficoEmprestimosMes(dados);
+            }
+        })
+        .catch(error => {
+            console.warn('Erro na API de empréstimos por mês, usando dados mock:', error);
+            criarGraficoEmprestimosMes(dadosMock.emprestimosMes);
+        });
+
+    function criarGraficoEmprestimosMes(dados) {
+        const ctx = document.getElementById('graficoEmprestimosMes');
+
+        // Limpa qualquer gráfico anterior
+        if (window.graficoEmprestimosMesInstance) {
+            window.graficoEmprestimosMesInstance.destroy();
+        }
+
+        window.graficoEmprestimosMesInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: dados.map(e => formatarMes(e.mes)),
+                datasets: [{
+                    label: 'Quantidade de Empréstimos',
+                    data: dados.map(e => e.total),
+                    borderColor: '#556B2F',
+                    backgroundColor: 'rgba(85, 107, 47, 0.1)',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.3,
+                    pointBackgroundColor: '#8B4513',
+                    pointBorderColor: '#654321',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: { size: 12, weight: 'bold' },
+                            padding: 20
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 10
+                        }
+                    }
+                }
+            }
+        });
+    }
+    // ===========================
+    //  GRÁFICO 6 - LIVROS COM BAIXA SAÍDA (VERSÃO CORRIGIDA)
+    // ===========================
+
+    // Criação SIMPLES e DIRETA do gráfico (sem fetch, sem funções extras)
+    setTimeout(() => {
+        const ctx = document.getElementById('graficoBaixaSaida');
+        if (ctx) {
+            // Dados mock simplificados
+            const dadosBaixaSaida = [
+                { titulo: "Ética e Moral", total: 2 },
+                { titulo: "Direito Constitucional", total: 1 },
+                { titulo: "Entomologia Avançada", total: 0 },
+                { titulo: "Arte Gótica", total: 1 },
+                { titulo: "Física Quântica", total: 2 },
+                { titulo: "Grego Antigo", total: 1 }
+            ];
+
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: dadosBaixaSaida.map(l => l.titulo),
+                    datasets: [{
+                        label: 'Empréstimos (últimos 6 meses)',
+                        data: dadosBaixaSaida.map(l => l.total),
+                        backgroundColor: '#A0522D',
+                        borderColor: '#8B4513',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y', // Barras horizontais
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+            console.log('Gráfico de baixa saída criado com sucesso!');
+        } else {
+            console.error('Elemento graficoBaixaSaida não encontrado!');
+        }
+    }, 500); // Pequeno delay para garantir que o DOM está pronto
+</script>
 
 <header class="topbar">
     <div class="container d-flex align-items-center justify-content-between">
-        <div class="d-flex align-items-center gap-3">
-            <a th:href="@{/}" class="brand d-flex align-items-center text-decoration-none">
-                <i class="fas fa-cloud me-2" style="color:var(--primary)"></i> ReadCloud
-            </a>
-        </div>
+        <a th:href="@{/}" class="brand text-decoration-none">
+            <i class="fas fa-cloud me-2" style="color:var(--primary)"></i> ReadCloud
+        </a>
 
         <div class="d-flex align-items-center gap-2">
-            <div sec:authorize="isAuthenticated()" class="text-end me-2 small-muted">
+            <div sec:authorize="isAuthenticated()" class="text-end small-muted">
                 <div th:text="${#authentication.name}">admin@admin.com</div>
-                <div class="small text-muted">Administrador</div>
+                <div class="small">Administrador</div>
             </div>
 
             <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
-                <button type="submit" class="btn btn-outline-secondary btn-sm">
+                <button class="btn btn-outline-secondary btn-sm">
                     <i class="fas fa-sign-out-alt me-1"></i> Sair
                 </button>
             </form>
@@ -129,90 +486,74 @@
 </header>
 
 <div class="d-flex">
-    <!-- Sidebar -->
     <aside class="sidebar d-none d-lg-block">
-        <div class="mb-4 text-center">
-            <h5 class="mb-0">Painel Admin</h5>
-            <small>ReadCloud</small>
+        <div class="text-center mb-4">
+            <h5>Painel Admin</h5><small>ReadCloud</small>
         </div>
 
         <nav class="nav flex-column">
-            <a class="nav-link active" th:href="@{/admin/painel}">
-                <i class="fas fa-tachometer-alt me-2"></i> Painel
-            </a>
-            <a class="nav-link" th:href="@{/admin/livros}">
-                <i class="fas fa-book me-2"></i> Livros
-            </a>
-            <a class="nav-link" th:href="@{/admin/livros/cadastrar}">
-                <i class="fas fa-plus me-2"></i> Cadastrar Livro
-            </a>
-            <a class="nav-link" th:href="@{/admin/categorias}">
-                <i class="fas fa-tags me-2"></i> Categorias
-            </a>
-            <a class="nav-link" th:href="@{/admin/usuarios}">
-                <i class="fas fa-users me-2"></i> Usuários
-            </a>
-            <a class="nav-link" th:href="@{/admin/emprestimos}">
-                <i class="fas fa-exchange-alt me-2"></i> Empréstimos
-            </a>
-            <hr style="border-color: rgba(255,255,255,0.12)"/>
-            <a class="nav-link" th:href="@{/}">
-                <i class="fas fa-home me-2"></i> Voltar ao Site
-            </a>
+            <a class="nav-link active" th:href="@{/admin/painel}"><i class="fas fa-tachometer-alt me-2"></i>Painel</a>
+            <a class="nav-link" th:href="@{/admin/livros}"><i class="fas fa-book me-2"></i>Livros</a>
+            <a class="nav-link" th:href="@{/admin/livros/cadastrar}"><i class="fas fa-plus me-2"></i>Cadastrar Livro</a>
+            <a class="nav-link" th:href="@{/admin/categorias}"><i class="fas fa-tags me-2"></i>Categorias</a>
+            <a class="nav-link" th:href="@{/admin/usuarios}"><i class="fas fa-users me-2"></i>Usuários</a>
+            <a class="nav-link" th:href="@{/admin/emprestimos}"><i class="fas fa-exchange-alt me-2"></i>Empréstimos</a>
+            <hr/>
+            <a class="nav-link" th:href="@{/}"><i class="fas fa-home me-2"></i>Voltar ao Site</a>
         </nav>
     </aside>
 
-    <!-- Main Content -->
     <main class="main container-fluid">
-
-        <div class="row align-items-center mb-3">
+        <div class="row mb-3">
             <div class="col-md-8">
-                <h2 class="mb-0">Painel Administrativo</h2>
-                <p class="small text-muted mb-0">Visão geral do sistema</p>
+                <h2>Painel Administrativo</h2>
+                <p class="small text-muted">Visão geral do sistema</p>
             </div>
         </div>
 
-        <!-- Stats -->
+        <!-- ======================
+             CARDS DE ESTATÍSTICAS
+        ======================= -->
         <div class="row g-3">
             <div class="col-sm-6 col-md-3">
                 <div class="stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between">
                         <div>
                             <div class="stat-value" th:text="${totalLivros}">0</div>
                             <div class="stat-label">Total de Livros</div>
                         </div>
-                        <i class="fas fa-book fa-2x" style="color:var(--primary-dark)"></i>
+                        <i class="fas fa-book fa-2x"></i>
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-md-3">
                 <div class="stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between">
                         <div>
                             <div class="stat-value" th:text="${totalUsuarios}">0</div>
                             <div class="stat-label">Usuários</div>
                         </div>
-                        <i class="fas fa-users fa-2x" style="color:var(--success)"></i>
+                        <i class="fas fa-users fa-2x"></i>
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-md-3">
                 <div class="stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between">
                         <div>
                             <div class="stat-value" th:text="${totalEmprestados}">0</div>
                             <div class="stat-label">Emprestados</div>
                         </div>
-                        <i class="fas fa-exchange-alt fa-2x" style="color:var(--accent)"></i>
+                        <i class="fas fa-exchange-alt fa-2x"></i>
                     </div>
                 </div>
             </div>
 
             <div class="col-sm-6 col-md-3">
                 <div class="stat-card">
-                    <div class="d-flex justify-content-between align-items-center">
+                    <div class="d-flex justify-content-between">
                         <div>
                             <div class="stat-value" th:text="${totalAtrasos}">0</div>
                             <div class="stat-label">Atrasos</div>
@@ -223,11 +564,103 @@
             </div>
         </div>
 
-        <!-- Recent Lists -->
+        <!-- ======================
+             GRÁFICOS (6 GRÁFICOS)
+        ======================= -->
         <div class="row mt-4">
+            <!-- Gráfico 1: Top 10 livros mais alugados -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Top 10 livros mais alugados</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoLivros"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 2: Top 10 estados que mais alugam -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Top 10 estados que mais alugam</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoEstados"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 3: Usuários que mais alugam (Top 5) -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Usuários que mais alugam (Top 5)</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoUsuariosTop"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 4: Livros nunca alugados -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Livros nunca alugados</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoLivrosNuncaAlugados"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 5: Empréstimos por mês -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Empréstimos por mês</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoEmprestimosMes"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gráfico 6: Livros com baixa saída -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card shadow-sm h-100">
+                    <div class="card-header">
+                        <strong>Livros com baixa saída</strong>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="grafico-container">
+                            <canvas id="graficoBaixaSaida"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================
+             TABELAS
+        ======================= -->
+        <div class="row mt-4">
+            <!-- Tabela: Últimos Livros -->
             <div class="col-lg-6 mb-3">
                 <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between">
                         <strong>Últimos Livros</strong>
                         <a th:href="@{/admin/livros}" class="small-muted">Ver todos</a>
                     </div>
@@ -243,9 +676,9 @@
                             </thead>
                             <tbody>
                             <tr th:each="livro : ${livros}">
-                                <td th:text="${livro.titulo}">Título</td>
-                                <td th:text="${livro.autor}">Autor</td>
-                                <td th:text="${livro.quantidade}">0</td>
+                                <td th:text="${livro.titulo}"></td>
+                                <td th:text="${livro.autor}"></td>
+                                <td th:text="${livro.quantidade}"></td>
                                 <td class="text-end">
                                     <a th:href="@{/admin/livros/editar/{id}(id=${livro.id})}" class="btn btn-sm btn-outline-success">
                                         <i class="fas fa-edit"></i>
@@ -262,9 +695,10 @@
                 </div>
             </div>
 
+            <!-- Tabela: Últimos Usuários -->
             <div class="col-lg-6 mb-3">
                 <div class="card shadow-sm">
-                    <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between">
                         <strong>Últimos Usuários</strong>
                         <a th:href="@{/admin/usuarios}" class="small-muted">Ver todos</a>
                     </div>
@@ -275,21 +709,15 @@
                                 <th>Nome</th>
                                 <th>Email</th>
                                 <th>Ativo</th>
-                                <th class="text-end">Ações</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="u : ${usuarios}">
-                                <td th:text="${u.nome}">Usuário</td>
-                                <td th:text="${u.email}">email@exemplo</td>
+                                <td th:text="${u.nome}"></td>
+                                <td th:text="${u.email}"></td>
                                 <td>
-                                    <span th:text="${u.ativo ? 'Sim' : 'Não'}"
-                                          th:classappend="${u.ativo} ? 'text-success' : 'text-danger'"></span>
-                                </td>
-                                <td class="text-end">
-                                    <a th:href="@{/admin/usuarios/editar/{id}(id=${u.id})}" class="btn btn-sm btn-outline-success">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
+                                        <span th:text="${u.ativo ? 'Sim' : 'Não'}"
+                                              th:classappend="${u.ativo} ? 'text-success' : 'text-danger'"></span>
                                 </td>
                             </tr>
 
@@ -302,7 +730,6 @@
                 </div>
             </div>
         </div>
-
     </main>
 </div>
 

@@ -6,9 +6,11 @@ import com.faculdade.biblioteca.modelo.Usuario;
 import com.faculdade.biblioteca.service.AvaliacaoService;
 import com.faculdade.biblioteca.service.LivroService;
 import com.faculdade.biblioteca.service.UsuarioService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -23,6 +25,9 @@ public class AvaliacaoController {
     @Autowired
     private UsuarioService usuarioService;
 
+    // ============================
+    // CRIAR AVALIAÇÃO
+    // ============================
     @PostMapping("/avaliar/{livroId}")
     public String avaliarLivro(@PathVariable Long livroId,
                                @RequestParam Integer rating,
@@ -30,14 +35,12 @@ public class AvaliacaoController {
                                Authentication authentication,
                                RedirectAttributes ra) {
         try {
-
             if (authentication == null) {
                 ra.addFlashAttribute("erro", "Você precisa estar logado para avaliar.");
                 return "redirect:/login";
             }
 
-            String email = authentication.getName();
-            Usuario usuario = usuarioService.buscarPorEmail(email)
+            Usuario usuario = usuarioService.buscarPorEmail(authentication.getName())
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
             Livro livro = livroService.buscarPorId(livroId)
@@ -45,16 +48,6 @@ public class AvaliacaoController {
 
             if (avaliacaoService.usuarioJaAvaliouLivro(usuario.getId(), livroId)) {
                 ra.addFlashAttribute("erro", "Você já avaliou este livro.");
-                return "redirect:/livros/detalhes/" + livroId;
-            }
-
-            if (rating < 1 || rating > 5) {
-                ra.addFlashAttribute("erro", "Selecione uma avaliação de 1 a 5 estrelas.");
-                return "redirect:/livros/detalhes/" + livroId;
-            }
-
-            if (comentario.trim().isEmpty()) {
-                ra.addFlashAttribute("erro", "Escreva um comentário antes de enviar.");
                 return "redirect:/livros/detalhes/" + livroId;
             }
 
@@ -68,5 +61,27 @@ public class AvaliacaoController {
         }
 
         return "redirect:/livros/detalhes/" + livroId;
+    }
+
+    // ============================
+    // EXCLUIR
+    // ============================
+    @PostMapping("/avaliacoes/excluir/{id}")
+    public String excluir(@PathVariable Long id, RedirectAttributes ra) {
+        avaliacaoService.excluir(id);
+        ra.addFlashAttribute("sucesso", "Avaliação removida!");
+        return "redirect:/livros";
+    }
+
+    // ============================
+    // EDITAR
+    // ============================
+    @GetMapping("/avaliacoes/editar/{id}")
+    public String editar(@PathVariable Long id, Model model) {
+        Avaliacao avaliacao = avaliacaoService.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Avaliação não encontrada"));
+
+        model.addAttribute("avaliacao", avaliacao);
+        return "avaliacoes/editar";
     }
 }
