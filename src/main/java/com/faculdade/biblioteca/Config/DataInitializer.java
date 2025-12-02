@@ -5,10 +5,11 @@ import com.faculdade.biblioteca.modelo.Usuario;
 import com.faculdade.biblioteca.modelo.PapelUsuario;
 import com.faculdade.biblioteca.repository.CategoriaRepository;
 import com.faculdade.biblioteca.repository.UsuarioRepository;
-import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 @Configuration
 public class DataInitializer {
@@ -26,27 +27,25 @@ public class DataInitializer {
     }
 
     @Bean
+    @Transactional
     public ApplicationRunner initializer() {
         return args -> {
-            // cria admin se não existir
             String adminEmail = "admin@admin.com";
+
             if (usuarioRepo.findByEmail(adminEmail).isEmpty()) {
                 Usuario admin = new Usuario();
                 admin.setNome("Administrador");
                 admin.setEmail(adminEmail);
-                admin.setSenha(passwordEncoder.encode("admin123")); // troque senha se quiser
-                admin.setPapel(String.valueOf(PapelUsuario.ROLE_ADMIN));
+                admin.setSenha(passwordEncoder.encode("admin123"));
+                admin.setPapel(PapelUsuario.ROLE_ADMIN.name());
                 admin.setAtivo(true);
                 usuarioRepo.save(admin);
-                System.out.println("Admin criado: " + adminEmail + " / admin123");
             }
 
-            // cria categorias iniciais se não existirem
             String[] categorias = {"Ficção", "Programação", "Ciências", "História"};
             for (String nome : categorias) {
                 if (categoriaRepo.findByNomeIgnoreCase(nome).isEmpty()) {
-                    Categoria c = new Categoria(nome);
-                    categoriaRepo.save(c);
+                    categoriaRepo.save(new Categoria(nome));
                 }
             }
         };

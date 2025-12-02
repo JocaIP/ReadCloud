@@ -43,7 +43,8 @@ public class Livro {
     private Double mediaAvaliacoes = 0.0;
     private Long totalAvaliacoes = 0L;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
+
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
@@ -110,5 +111,9 @@ public class Livro {
             return 0;
         }
         return this.quantidadeTotal - this.quantidade;
+    }
+
+    public void setAnoPublicicao(Integer anoPublicacao) {
+
     }
 }

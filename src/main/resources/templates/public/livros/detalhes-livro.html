@@ -212,7 +212,7 @@
 
     <!-- SE LOGADO: MOSTRA FORM -->
     <div th:if="${usuarioLogado}" class="mb-5">
-        <form th:action="@{/livros/avaliar/{id}(id=${livro.id})}"
+        <form th:action="@{/livros/avaliar/{livroId}(livroId=${livro.id})}"
               method="post"
               class="p-4 bg-white rounded shadow-sm">
 
@@ -241,6 +241,7 @@
             <button class="btn btn-primary fw-bold">
                 <i class="fas fa-paper-plane me-1"></i> Enviar Avaliação
             </button>
+
         </form>
     </div>
 

@@ -28,13 +28,13 @@ public class AdminController {
     @Autowired private CategoriaService categoriaService;
     @Autowired private UsuarioService usuarioService;
     @Autowired private EmprestimoService emprestimoService;
-    @Autowired private CsvImportService csvImportService;
-    @Autowired private UsuarioCsvService usuarioCsvService;
+    @Autowired private CsvImportService csvImportService; // livros
     @Autowired private NotificacaoService notificacaoService;
+    @Autowired private CsvImportUsuarioService csvImportUsuarioService;
 
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // PAINEL PRINCIPAL
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     @GetMapping("/painel")
     public String painelAdmin(Model model) {
 
@@ -50,9 +50,9 @@ public class AdminController {
         return "Admin/Painel";
     }
 
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // LIVROS
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     @GetMapping("/livros")
     public String listarLivros(@RequestParam(required = false) String busca,
                                @RequestParam(required = false) Long categoria,
@@ -128,7 +128,7 @@ public class AdminController {
             livroExistente.setDescricao(livroForm.getDescricao());
             livroExistente.setQuantidade(livroForm.getQuantidade());
             livroExistente.setEditora(livroForm.getEditora());
-            livroExistente.setAnoPublicacao(livroForm.getAnoPublicacao());
+            livroExistente.setAnoPublicicao(livroForm.getAnoPublicacao());
             livroExistente.setCategoria(categoria);
 
             livroService.atualizarComCapa(id, livroExistente, imagemCapa);
@@ -152,9 +152,9 @@ public class AdminController {
         return "redirect:/admin/livros";
     }
 
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // IMPORTAÇÃO CSV — LIVROS
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     @GetMapping("/livros/importar")
     public String formImportarLivrosCsv() {
         return "Admin/Livro/importar-csv";
@@ -181,35 +181,9 @@ public class AdminController {
         return "redirect:/admin/livros";
     }
 
-    // ------------------------------------------------------------
-    // CATEGORIAS
-    // ------------------------------------------------------------
-    @GetMapping("/categorias")
-    public String listarCategorias(Model model) {
-        model.addAttribute("categorias", categoriaService.listarTodas());
-        return "Admin/Categoria/categorias";
-    }
-
-    @GetMapping("/categorias/nova")
-    public String novaCategoriaForm(Model model) {
-        model.addAttribute("categoria", new Categoria());
-        return "Admin/Categoria/categoria-form";
-    }
-
-    @PostMapping("/categorias/nova")
-    public String salvarCategoria(@ModelAttribute Categoria categoria, RedirectAttributes ra) {
-        try {
-            categoriaService.salvar(categoria);
-            ra.addFlashAttribute("sucesso", "Categoria cadastrada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao salvar: " + e.getMessage());
-        }
-        return "redirect:/admin/categorias";
-    }
-
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // USUÁRIOS
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     @GetMapping("/usuarios")
     public String listarUsuarios(Model model) {
         model.addAttribute("usuarios", usuarioService.listarTodos());
@@ -231,31 +205,36 @@ public class AdminController {
         return "Admin/Usuario/usuario-detalhes";
     }
 
-    // ------------------------------------------------------------
-    // IMPORTAÇÃO CSV — USUÁRIOS
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // IMPORTAÇÃO CSV — USUÁRIOS (CORRIGIDO!)
+    // -------------------------------------------------------------------------
     @GetMapping("/usuarios/importar")
     public String formImportarUsuariosCsv() {
         return "Admin/Usuario/importar-csv";
     }
 
     @PostMapping("/usuarios/importar")
-    public String importarUsuariosCsv(@RequestParam("arquivo") MultipartFile arquivo,
-                                      RedirectAttributes ra) {
+    public String importarUsuarios(@RequestParam("arquivo") MultipartFile arquivo, RedirectAttributes ra) {
 
         try {
-            int total = usuarioCsvService.importarCsv(arquivo);
-            ra.addFlashAttribute("sucesso", total + " usuários importados com sucesso!");
+            Map<String, Object> res = csvImportUsuarioService.importarUsuariosCSV(arquivo.getInputStream());
+
+            ra.addFlashAttribute("sucesso", "Importados: " + res.get("importados"));
+
+            if (!((List<?>) res.get("erros")).isEmpty()) {
+                ra.addFlashAttribute("erro", res.get("erros").toString());
+            }
+
         } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao importar CSV: " + e.getMessage());
+            ra.addFlashAttribute("erro", "Falha ao importar CSV: " + e.getMessage());
         }
 
         return "redirect:/admin/usuarios";
     }
 
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     // NOTIFICAÇÕES
-    // ------------------------------------------------------------
+    // -------------------------------------------------------------------------
     @PostMapping("/notificacoes/enviar/{id}")
     public String enviarLembrete(@PathVariable Long id, RedirectAttributes ra) {
 
@@ -264,9 +243,11 @@ public class AdminController {
 
         notificacaoService.enviar(usuario, "Você possui livros em atraso ou pendências!");
 
-        ra.addFlashAttribute("sucesso", "Lembrete enviado para o usuário!");
+        ra.addFlashAttribute("sucesso", "Lembrete enviado!");
         return "redirect:/admin/usuarios/detalhes/" + id;
     }
+
+    // ATIVAR / DESATIVAR / EXCLUIR
     @GetMapping("/usuarios/ativar/{id}")
     public String ativarUsuario(@PathVariable Long id, RedirectAttributes ra) {
         try {
@@ -277,6 +258,7 @@ public class AdminController {
         }
         return "redirect:/admin/usuarios";
     }
+
     @GetMapping("/usuarios/desativar/{id}")
     public String desativarUsuario(@PathVariable Long id, RedirectAttributes ra) {
         try {
@@ -287,38 +269,20 @@ public class AdminController {
         }
         return "redirect:/admin/usuarios";
     }
+
     @GetMapping("/usuarios/excluir/{id}")
     public String excluirUsuario(@PathVariable Long id, RedirectAttributes ra) {
         try {
             usuarioService.excluirUsuario(id);
-            ra.addFlashAttribute("sucesso", "Usuário excluído com sucesso!");
+            ra.addFlashAttribute("sucesso", "Usuário excluído!");
         } catch (Exception e) {
             ra.addFlashAttribute("erro", "Erro ao excluir usuário: " + e.getMessage());
         }
         return "redirect:/admin/usuarios";
     }
-
-    @PostMapping("/emprestimos/atrasar/{id}")
-    public String atrasarEmprestimo(@PathVariable Long id, RedirectAttributes ra) {
-
-        try {
-            emprestimoService.forcarAtraso(id);  // Você cria este método no service
-            ra.addFlashAttribute("sucesso", "Empréstimo marcado como atrasado!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao marcar atraso: " + e.getMessage());
-        }
-
-        return "redirect:/admin/emprestimos";
-    }
-
-    @PostMapping("/emprestimos/quitar/{id}")
-    public String quitarEmprestimo(@PathVariable Long id, RedirectAttributes ra) {
-        try {
-            emprestimoService.quitarMulta(id); // você implementa no service
-            ra.addFlashAttribute("sucesso", "Multa quitada com sucesso!");
-        } catch (Exception e) {
-            ra.addFlashAttribute("erro", "Erro ao quitar multa: " + e.getMessage());
-        }
-        return "redirect:/admin/emprestimos";
+    @GetMapping("/categorias")
+    public String listarCategorias(Model model) {
+        model.addAttribute("categorias", categoriaService.listarTodas());
+        return "Admin/Categoria/categorias";
     }
 }

@@ -197,20 +197,6 @@
                                    class="btn btn-outline-primary btn-sm w-100 mb-2">
                                     <i class="fas fa-eye me-1"></i> Ver Livro
                                 </a>
-
-                                <a th:href="@{/avaliacoes/editar/{id}(id=${av.id})}"
-                                   class="btn btn-outline-warning btn-sm w-100 mb-2">
-                                    <i class="fas fa-edit me-1"></i> Editar
-                                </a>
-
-                                <form th:action="@{/avaliacoes/excluir/{id}(id=${av.id})}" method="post">
-                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}">
-                                    <button class="btn btn-outline-danger btn-sm w-100"
-                                            onclick="return confirm('Excluir esta avaliação?')">
-                                        <i class="fas fa-trash me-1"></i> Excluir
-                                    </button>
-                                </form>
-
                             </div>
 
                         </div>
